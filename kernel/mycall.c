@@ -54,26 +54,27 @@ asmlinkage ssize_t hooked_sys_read(struct pt_regs* regs)
     int i;
     ssize_t ret_val = -1;
     ret_val = original_read(regs);
-    char path[100];
-    char* ppath = path;
-    unsigned int fd = (unsigned int)regs->di; 
-    // if (fd == 0) {
-    //     return ret_val;
-    // }
-    struct files_struct *myfiles;
-    myfiles = current->files;
-    struct file *myfile;
-    myfile = myfiles->fdt->fd[(unsigned int)regs->di];
-    ppath = d_path(&(myfile->f_path), (char *)ppath, 100);
-    char filename[100] = {'\0'};
-    strcpy(filename, ppath);
-    char* type = "";
-    type = my_get_type(filename);
     for (i = 0; i < privilege_index; i++) {
-        if (strcmp(current->comm, p[i].exe_file) == 0 && strcmp(p[i].kind, type) == 0 && p[i].read == 0) {
-            printk(KERN_INFO "%s cannot read type %s\n", p[i].exe_file, p[i].kind);
-            return -EPERM;
-        }		
+        if (strcmp(current->comm, p[i].exe_file) == 0) {
+            char path[100];
+            char* ppath = path;
+            struct files_struct *myfiles;
+            myfiles = current->files;
+            struct file *myfile;
+            myfile = myfiles->fdt->fd[(unsigned int)regs->di];
+            ppath = d_path(&(myfile->f_path), (char *)ppath, 100);
+            char filename[100] = {'\0'};
+            strcpy(filename, ppath);
+            char* type = "";
+            type = my_get_type(filename);
+            if (type != NULL && strcmp(type, p[i].kind) == 0 && p[i].read == 0) {
+                printk(KERN_INFO "%s cannot read type %s\n", p[i].exe_file, p[i].kind);
+                char msg[64];
+                sprintf(msg, "%s cannot write type %s\n", p[i].exe_file, p[i].kind);
+                send_msg(msg, sizeof(msg));
+                return -EPERM;
+            }
+        }
     }
     
     return ret_val;
@@ -83,27 +84,28 @@ asmlinkage ssize_t hooked_sys_write(struct pt_regs* regs)
 {
     int i;
     ssize_t ret_val = -1;
-    char path[100];
-    char* ppath = path;
-    unsigned int fd = (unsigned int)regs->di; 
-    // if (fd == 0) {
-    //     return ret_val;
-    // }
-    struct files_struct *myfiles;
-    myfiles = current->files;
-    struct file *myfile;
-    myfile = myfiles->fdt->fd[(unsigned int)regs->di];
-    ppath = d_path(&(myfile->f_path), (char *)ppath, 100);
-    char filename[100] = {'\0'};
-    strcpy(filename, ppath);
-    char* type = "";
-    type = my_get_type(filename);
-    // for (i = 0; i < privilege_index; i++) {
-    //     if (strcmp(current->comm, p[i].exe_file) == 0 && strcmp(p[i].kind, type) == 0 && p[i].write == 0) {
-    //         printk(KERN_INFO "%s cannot write type %s\n", p[i].exe_file, p[i].kind);
-    //         return -EPERM;
-    //     }		
-    // }
+    for (i = 0; i < privilege_index; i++) {
+        if (strcmp(current->comm, p[i].exe_file) == 0) {
+            char path[100];
+            char* ppath = path;
+            struct files_struct *myfiles;
+            myfiles = current->files;
+            struct file *myfile;
+            myfile = myfiles->fdt->fd[(unsigned int)regs->di];
+            ppath = d_path(&(myfile->f_path), (char *)ppath, 100);
+            char filename[100] = {'\0'};
+            strcpy(filename, ppath);
+            char* type = "";
+            type = my_get_type(filename);
+            if (type != NULL && strcmp(type, p[i].kind) == 0 && p[i].write == 0) {
+                printk(KERN_INFO "%s cannot write type %s\n", p[i].exe_file, p[i].kind);
+                char msg[64];
+                sprintf(msg, "%s cannot write type %s\n", p[i].exe_file, p[i].kind);
+                send_msg(msg, sizeof(msg));
+                return -EPERM;
+            } 
+        }
+    }
     ret_val = original_write(regs);
     return ret_val;
 }

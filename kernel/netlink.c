@@ -63,8 +63,6 @@ static void netlink_rcv_msg(struct sk_buff *skb) {
             int write_;
             int read_;
 
-            // TODO
-            // decode msg from user
             if (strstr(umsg, "add") != NULL) {
                 command_ = "add";
                 len = strlen(umsg);

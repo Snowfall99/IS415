@@ -3,6 +3,6 @@
 
 int main(void) {
     int ret = -1;
-    ret = mysendmsg("add test txt 1 0");
+    ret = mysendmsg("add test txt 0 0");
     return 0;
 }
