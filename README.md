@@ -1,0 +1,1 @@
+parseCmd needs to handle unusual situation

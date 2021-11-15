@@ -7,3 +7,4 @@ test
 *.mod
 *.o
 *.mod.c
+cli
