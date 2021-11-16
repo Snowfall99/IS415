@@ -14,9 +14,21 @@ const std::string ADD = "add";
 const std::string UPDATE = "update";
 const std::string DELETE = "delete";
 
+struct Privilege {
+    std::string exe;
+    std::string type;
+    int write;
+    int read;
+
+    Privilege(std::string exe_, std::string type_) : exe(exe_), type(type_), write(0), read(0) {}
+    Privilege(std::string exe_, std::string type_, int write_=0, int read_=0) : exe(exe_), type(type_), write(write_), read(read_) {} 
+};
+
 void showHelp();
 bool parseCmd(std::string, std::string&, std::string&, std::vector<std::pair<std::string, int> >&, std::pair<std::string, std::string>&);
 bool checkOpt(std::vector<std::pair<std::string ,int> >);
+void listPrivileges();
+Privilege genPrivilege(std::string, std::string, std::vector<std::pair<std::string, int> >);
 
 int main(int argc, char** argv) {
     while (1) {
@@ -35,6 +47,8 @@ int main(int argc, char** argv) {
             showHelp();
         } else if (lineStr == "exit") {
             break;
+        } else if (lineStr == "list") {
+            listPrivileges();
         } else {
             std::string cmd;
             std::string exe;
@@ -46,25 +60,28 @@ int main(int argc, char** argv) {
             if (!checkOpt(options)) {
                 continue;
             }
+            Privilege privilege = genPrivilege(exe, type.second, options);
             printf("cmd: %s\n", cmd.c_str());
-            printf("exe: %s\n", exe.c_str());
-            printf("type: %s\n", type.second.c_str());
-            for (int i = 0; i < options.size(); i++) {
-                printf("%s: %d\n", options[i].first.c_str(), options[i].second);
-            }
+            printf("exe: %s\n", privilege.exe.c_str());
+            printf("type: %s\n",privilege.type.c_str());
+            printf("write: %d\n", privilege.write);
+            printf("read: %d\n", privilege.read);
         }
     }
 }
 
 void showHelp() {
+    // TODO alignment
     printf("CLI usage Help\n");
     printf("help \"show this message\"\n");
-    printf("add <exe filename> \"add privileges of exe\"\n");
-    printf("update <exe filename> \"update privileges of exe \"\n");
-    printf("delete <exe filename> \"delete privilege of exe\"\n");
+    printf("add <exe filename> <-t type>\"add privileges of exe\"\n");
+    printf("update <exe filename> <-t type>\"update privileges of exe \"\n");
+    printf("delete <exe filename> <-t type>\"delete privilege of exe\"\n");
     printf("exit \"exit cli\"\n");
 }
 
+// TODO 
+// return a privilege
 bool parseCmd(std::string line_, std::string& cmd_, std::string& exe_, std::vector<std::pair<std::string, int> >& options_, std::pair<std::string, std::string>& type_) {
     int len = strlen(line_.c_str());
     bool flag = true;
@@ -162,4 +179,27 @@ bool checkOpt(std::vector<std::pair<std::string, int> > options_) {
     }
 
     return flag;
+}
+
+Privilege genPrivilege(std::string exe_, std::string type_, std::vector<std::pair<std::string, int> > options_) {
+    int optLen = options_.size();
+    int write = 0;
+    int read = 0;
+
+    for (int i = 0; i < optLen; i++) {
+        if (options_[i].first == READ) {
+            read = options_[i].second;
+        } else if (options_[i].first == WRITE) {
+            write = options_[i].second;
+        }
+    }
+
+    Privilege privilege(exe_, type_, write, read);
+    return privilege;
+}
+
+void listPrivileges() {
+    // TODO
+    // send list message to kernel
+    // wait for kernel return privileges
 }
