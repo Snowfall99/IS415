@@ -21,14 +21,12 @@ int send_msg(char* pbuf, uint16_t len) {
 
     int ret;
 
-    // alloc space for sk_buff
     nl_skb = nlmsg_new(len, GFP_ATOMIC);
     if (!nl_skb) {
         printk(KERN_INFO "netlink alloc fail\n");
         return -1;
     }
 
-    // set netlink header
     nlh = nlmsg_put(nl_skb, 0, 0, NETLINK_TEST, len, 0);
     if (nlh == NULL) {
         printk(KERN_INFO "nlmsg_put fail\n");
@@ -36,7 +34,6 @@ int send_msg(char* pbuf, uint16_t len) {
         return -1;
     }
 
-    // copy data for sending 
     memcpy(nlmsg_data(nlh), pbuf, len);
     ret = netlink_unicast(nlsk, nl_skb, USER_PORT, MSG_DONTWAIT);
 
@@ -44,7 +41,7 @@ int send_msg(char* pbuf, uint16_t len) {
 
 }
 
-static void netlink_rcv_msg(struct sk_buff *skb) {
+static void rcv_msg(struct sk_buff *skb) {
     struct nlmsghdr *nlh = NULL;
     char* umsg = NULL;
     int i, j;
@@ -108,6 +105,9 @@ static void netlink_rcv_msg(struct sk_buff *skb) {
                 kind_ = "txt";
                 write_ = 0;
                 read_ = 0;
+            } else if (strcmp(umsg, "list") == 0) {
+                // TODO 
+                // Return all privileges to user space through netlink
             }
             if (strcmp(command_, "add") == 0) {
                 add_privilege(exe_file_, write_, read_, kind_);
@@ -121,17 +121,18 @@ static void netlink_rcv_msg(struct sk_buff *skb) {
 }
 
 struct netlink_kernel_cfg cfg = {
-    .input = netlink_rcv_msg,
+    .input = rcv_msg,
 };
 
 int init_netlink(void) {
+    int i;
+
     nlsk = (struct sock *)netlink_kernel_create(&init_net, NETLINK_TEST, &cfg);
     if (!nlsk) {
         printk(KERN_INFO, "netlink kernel create error\n");
         return -1;
     }
-    // init message array
-    int i;
+
     for (i = 0; i < 1024; i++) {
         msg_array[i] = 0;
     }

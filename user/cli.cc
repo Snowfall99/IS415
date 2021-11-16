@@ -1,11 +1,14 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <iostream>
+#include <iomanip>
+#include <cstring>
+#include <cstdio>
 #include <string>
 #include <vector>
 #include <utility>
 #include <readline/readline.h>
 #include <readline/history.h>
+
+#include "netlink.h"
 
 const std::string READ = "read";
 const std::string WRITE = "write";
@@ -61,39 +64,37 @@ int main(int argc, char** argv) {
                 continue;
             }
             Privilege privilege = genPrivilege(exe, type.second, options);
-            printf("cmd: %s\n", cmd.c_str());
-            printf("exe: %s\n", privilege.exe.c_str());
-            printf("type: %s\n",privilege.type.c_str());
-            printf("write: %d\n", privilege.write);
-            printf("read: %d\n", privilege.read);
+            std::cout << cmd << std::setw(16) << privilege.exe << std::setw(16) << privilege.type << std::setw(8)
+                << privilege.write << std::setw(8) << privilege.read << std::endl;
+            char msg[64];
+            std::sprintf(msg, "%s %s %s %d %d", cmd.c_str(), privilege.exe.c_str(), privilege.type.c_str(), privilege.write, privilege.read);
+            my_send_msg(msg);
         }
     }
 }
 
 void showHelp() {
-    // TODO alignment
-    printf("CLI usage Help\n");
-    printf("help \"show this message\"\n");
-    printf("add <exe filename> <-t type>\"add privileges of exe\"\n");
-    printf("update <exe filename> <-t type>\"update privileges of exe \"\n");
-    printf("delete <exe filename> <-t type>\"delete privilege of exe\"\n");
-    printf("exit \"exit cli\"\n");
+    std::cout << "CLI usage Help" << std::endl;
+    std::cout << std::left << std::setw(16) << "help" << std::setw(32) << "" << std::setw(32) << "show this message" << std::endl;
+    std::cout << std::left << std::setw(16) << "add" << std::setw(16) << "<exe filename>" << std::setw(16) << "<-t type>" << std::setw(32) << "add privileges of exe" << std::endl;
+    std::cout << std::left << std::setw(16) << "update" << std::setw(16) << "<exe filename>" << std::setw(16) << "<-t type>" << std::setw(32) << "update privileges of exe" << std::endl;
+    std::cout << std::left << std::setw(16) << "delete" << std::setw(16) << "<exe filename>" << std::setw(16) << "<-t type>" << std::setw(32) << "delete privileges of exe" << std::endl;
+    std::cout << std::left << std::setw(16) << "list" << std::setw(32) << "" << std::setw(32) << "show all privileges" << std::endl;
+    std::cout << std::left << std::setw(16) << "exit" << std::setw(32) << "" << std::setw(32) << "exit cli" << std::endl;
 }
 
-// TODO 
-// return a privilege
 bool parseCmd(std::string line_, std::string& cmd_, std::string& exe_, std::vector<std::pair<std::string, int> >& options_, std::pair<std::string, std::string>& type_) {
     int len = strlen(line_.c_str());
     bool flag = true;
     int i = 0;
 
     // trim blank space
-    while (line_[i] == ' ') {
+    while (line_[i] == ' ' && i < len) {
         i ++;
     }
 
     // get the cmd
-    while (line_[i] != ' ') {
+    while (line_[i] != ' ' && i < len) {
         cmd_.push_back(line_[i]);
         i ++;
     }
@@ -102,12 +103,12 @@ bool parseCmd(std::string line_, std::string& cmd_, std::string& exe_, std::vect
     // check cmd
     if (strcmp(cmd_.c_str(), ADD.c_str()) != 0 && strcmp(cmd_.c_str(), UPDATE.c_str()) != 0 && strcmp(cmd_.c_str(), DELETE.c_str()) != 0) {
         flag = false;
-        printf("undefined command: %s\n", cmd_.c_str());
+        std::cout << "undefined command: " << cmd_ << std::endl;
         return flag;
     }
 
     // get exe filename
-    while (line_[i] != ' ') {
+    while (line_[i] != ' ' && i < len) {
         exe_.push_back(line_[i]);
         i ++;
     }
@@ -144,7 +145,7 @@ bool parseCmd(std::string line_, std::string& cmd_, std::string& exe_, std::vect
                 option.second = (line_[i] - '0');
                 options_.push_back(option);
             } else {
-                printf("fail to parse undefined flag\n");
+                std::cout << "fail to parse undefined flag" << std::endl;
                 flag = false;
                 break;
             }
@@ -152,7 +153,7 @@ bool parseCmd(std::string line_, std::string& cmd_, std::string& exe_, std::vect
             continue;
         }
         flag = false;
-        printf("fail to parse undefined flag\n");
+        std::cout << "fail to parse undefined flag" << std::endl;
         break;
     }
  
@@ -168,12 +169,12 @@ bool checkOpt(std::vector<std::pair<std::string, int> > options_) {
         int optValue = options_[i].second;
         if (optKey != READ && optKey != WRITE) {
             flag = false;
-            printf("Fail to parse %s\n", optKey.c_str());
+            std::cout << "Fail to parse " << optKey << std::endl;
             break;
         }
         if (optValue != 0 && optValue != 1) {
             flag = false;
-            printf("Option value can only be 0 or 1\n");
+            std::cout << "Option value can only be 0 or 1" << std::endl;
             break;
         }
     }

@@ -48,6 +48,7 @@ unsigned long *original_syscall_table = NULL;
 typedef asmlinkage ssize_t (*original_syscall_t)(struct pt_regs* regs);
 original_syscall_t original_read = NULL;
 original_syscall_t original_write = NULL;
+original_syscall_t original_open = NULL;
 
 asmlinkage ssize_t hooked_sys_read(struct pt_regs* regs)
 {
@@ -110,6 +111,17 @@ asmlinkage ssize_t hooked_sys_write(struct pt_regs* regs)
     return ret_val;
 }
 
+asmlinkage ssize_t hooked_sys_open(struct pt_regs* regs) 
+{
+    ssize_t ret_val = -1;
+    ret_val = original_open(regs);
+    printk(KERN_INFO "filename: %s\n", (char*)regs->di);
+    if (strcmp(current->comm, "cat") == 0) {
+        printk(KERN_INFO "test\n");
+    }
+    return ret_val;
+}
+
 static int __init mycall_init(void)
 {
     int nl = init_netlink();
@@ -123,8 +135,10 @@ static int __init mycall_init(void)
 
     original_read = (original_syscall_t)original_syscall_table[__NR_read];
     original_write = (original_syscall_t)original_syscall_table[__NR_write];
+    original_open = (original_syscall_t)original_syscall_table[__NR_open];
     original_syscall_table[__NR_read] = (unsigned long)hooked_sys_read;
     original_syscall_table[__NR_write] = (unsigned long)hooked_sys_write;
+    original_syscall_table[__NR_open] = (unsigned long)hooked_sys_open;
 
     turn_on_wr_protect(original_syscall_table);
     return 0;
@@ -135,6 +149,7 @@ static void __exit mycall_exit(void)
     turn_off_wr_protect(original_syscall_table);
     original_syscall_table[__NR_read] = (unsigned long)original_read;
     original_syscall_table[__NR_write] = (unsigned long)original_write;
+    original_syscall_table[__NR_open] = (unsigned long)original_open;
     turn_on_wr_protect(original_syscall_table);
     remove_netlink();
     printk(KERN_INFO "remove syscall\n");
