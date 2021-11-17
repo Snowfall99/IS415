@@ -16,10 +16,10 @@ struct user_msg_info {
     char msg[MSG_LEN];
 };
 
-int my_send_msg(char*);
-int my_recv_msg(void);
+int my_send_msg(const char*);
+int my_recv_msg(char*);
 
-int my_send_msg(char* umsg_) {
+int my_send_msg(const char* umsg_) {
     int sk_fd;
     int ret;
     struct user_msg_info u_info;
@@ -99,7 +99,7 @@ int my_recv_msg(char* umsg_) {
 
     memset(&u_info, 0, sizeof(u_info));
     len = sizeof(struct sockaddr_nl);
-    ret = recvfrom(sk_fd, &u_info, sizeof(user_msg_info), 0, (struct sockaddr *)&src_addr, &len);
+    ret = recvfrom(sk_fd, &u_info, sizeof(user_msg_info), 0, (struct sockaddr *)&dst_addr, &len);
     if(!ret) {
         perror("recv form kernel error\n");
         close(sk_fd);

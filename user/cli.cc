@@ -16,6 +16,7 @@ const std::string WRITE = "write";
 const std::string ADD = "add";
 const std::string UPDATE = "update";
 const std::string DELETE = "delete";
+const std::string LIST = "list";
 
 struct Privilege {
     std::string exe;
@@ -64,10 +65,8 @@ int main(int argc, char** argv) {
                 continue;
             }
             Privilege privilege = genPrivilege(exe, type.second, options);
-            std::cout << cmd << std::setw(16) << privilege.exe << std::setw(16) << privilege.type << std::setw(8)
-                << privilege.write << std::setw(8) << privilege.read << std::endl;
             char msg[64];
-            std::sprintf(msg, "%s %s %s %d %d", cmd.c_str(), privilege.exe.c_str(), privilege.type.c_str(), privilege.write, privilege.read);
+            std::sprintf(msg, "%-16s %-16s %-16s %d %d", cmd.c_str(), privilege.exe.c_str(), privilege.type.c_str(), privilege.write, privilege.read);
             my_send_msg(msg);
         }
     }
@@ -125,6 +124,9 @@ bool parseCmd(std::string line_, std::string& cmd_, std::string& exe_, std::vect
                 std::pair<std::string, std::string> type;
                 type.first = "type";
                 i += 2;
+                while (line_[i] == ' ' && i < len) {
+                    i ++:
+                }
                 std::string t;
                 while (line_[i] != ' ' && i < len) {
                     t.push_back(line_[i]);
@@ -136,12 +138,18 @@ bool parseCmd(std::string line_, std::string& cmd_, std::string& exe_, std::vect
                 std::pair<std::string, int> option;
                 option.first = "write";
                 i += 2;
+                while (line_[i] == ' ' && i < len) {
+                    i ++:
+                }
                 option.second = (line_[i] - '0');
                 options_.push_back(option);
             } else if (line_[i] == 'r') {
                 std::pair<std::string, int> option;
                 option.first = "read";
                 i += 2;
+                while (line_[i] == ' ' && i < len) {
+                    i ++:
+                }
                 option.second = (line_[i] - '0');
                 options_.push_back(option);
             } else {
@@ -200,7 +208,10 @@ Privilege genPrivilege(std::string exe_, std::string type_, std::vector<std::pai
 }
 
 void listPrivileges() {
+    char msg[64];
+    std::sprintf(msg, "%-54s", LIST.c_str());
+    my_send_msg(msg);
     // TODO
-    // send list message to kernel
-    // wait for kernel return privileges
+    // send list msg to kernel 
+    // wait for response
 }

@@ -41,87 +41,141 @@ int send_msg(char* pbuf, uint16_t len) {
 
 }
 
-static void rcv_msg(struct sk_buff *skb) {
+static void my_rcv_msg(struct sk_buff *skb) {
     struct nlmsghdr *nlh = NULL;
     char* umsg = NULL;
-    int i, j;
+    int i;
     int len;
     int temp_len;
+
+    char* command_ = "";
+    char* exe_;
+    char* type_;
+    int write_;
+    int read_;
+
     if (skb->len >= nlmsg_total_size(0)) {
         nlh = nlmsg_hdr(skb);
         umsg = NLMSG_DATA(nlh);
         if (umsg) {
             printk(KERN_INFO "kernel receive from user: %s\n", umsg);
-            char* command_;
-            char* exe_file_;
-            exe_file_ = kmalloc(128, GFP_KERNEL);
-            char* kind_;
-            kind_ = kmalloc(32, GFP_KERNEL);
-            int write_;
-            int read_;
+            exe_ = kmalloc(128, GFP_KERNEL);
+            type_ = kmalloc(32, GFP_KERNEL);
 
             if (strstr(umsg, "add") != NULL) {
                 command_ = "add";
                 len = strlen(umsg);
-                for (i = 4; i < len && umsg[i] != ' '; i++) {
-                    temp_len = strlen(exe_file_);
-                    exe_file_[temp_len] = umsg[i];
-                    exe_file_[temp_len+1] = '\0';
+
+                i = 4;
+                while (umsg[i] == ' ' && i < len) {
+                    i ++;
                 }
-                i += 1;
-                for (; i < len && umsg[i] != ' '; i++) {
-                    temp_len = strlen(kind_);
-                    kind_[temp_len] = umsg[i];
-                    kind_[temp_len+1] = '\0';
+                while (umsg[i] != ' ' && i < len) {
+                    temp_len = strlen(exe_);
+                    exe_[temp_len] = umsg[i];
+                    exe_[temp_len+1] = '\0';
+                    i ++;
                 }
-                i += 1;
+                
+                while (umsg[i] == ' ' && i < len) {
+                    i++;
+                }
+                while (umsg[i] != ' ' && i < len) {
+                    temp_len = strlen(type_);
+                    type_[temp_len] = umsg[i];
+                    type_[temp_len+1] = '\0';
+                    i ++;
+                }
+                
+                while (umsg[i] == ' ' && i < len) {
+                    i++;
+                }
                 write_ = (umsg[i] - '0');
-                i += 2;
+                
+                while (umsg[i] == ' ' && i < len) {
+                    i++;
+                }
                 read_ = (umsg[i] - '0');
-                printk(KERN_INFO "add:%s,%s,%d,%d\n", exe_file_, kind_, write_, read_);
-            } else if (strstr(umsg, "modify") != NULL) {
-                command_ = "modify";
+                printk(KERN_INFO "add:%s,%s,%d,%d\n", exe_, type_, write_, read_);
+            } else if (strstr(umsg, "update") != NULL) {
+                command_ = "update";
                 len = strlen(umsg);
-                for (i = 7; i < len && umsg[i] != ' '; i++) {
-                    temp_len = strlen(exe_file_);
-                    exe_file_[temp_len] = umsg[i];
-                    exe_file_[temp_len+1] = '\0';
+
+                i = 7;
+                while (umsg[i] == ' ' && i < len) {
+                    i ++;
                 }
-                i += 1;
-                for (; i < len && umsg[i] != ' '; i++) {
-                    temp_len = strlen(kind_);
-                    kind_[temp_len] = umsg[i];
-                    kind_[temp_len+1] = '\0';
+                while (umsg[i] != ' ' && i < len) {
+                    temp_len = strlen(exe_);
+                    exe_[temp_len] = umsg[i];
+                    exe_[temp_len+1] = '\0';
+                    i ++;
                 }
-                i += 1;
+                
+                while (umsg[i] == ' ' && i < len) {
+                    i ++;
+                }
+                while (umsg[i] != ' ' && i < len) {
+                    temp_len = strlen(type_);
+                    type_[temp_len] = umsg[i];
+                    type_[temp_len+1] = '\0';
+                    i ++;
+                }
+
+                while (umsg[i] == ' ' && i < len) {
+                    i ++;
+                }
                 write_ = (umsg[i] - '0');
-                i += 2;
+                i ++;
+                
+                while (umsg[i] == ' ' && i < len) {
+                    i ++;
+                }
                 read_ = (umsg[i] - '0');
-                printk(KERN_INFO "modify:%s,%s,%d,%d\n", exe_file_, kind_, write_, read_);
+                i ++;
+                printk(KERN_INFO "update:%s,%s,%d,%d\n", exe_, type_, write_, read_);
             } else if (strstr(umsg, "delete") != NULL) {
-                printk(KERN_INFO "delete\n");
                 command_ = "delete";
-                exe_file_ = "test";
-                kind_ = "txt";
-                write_ = 0;
-                read_ = 0;
-            } else if (strcmp(umsg, "list") == 0) {
-                // TODO 
-                // Return all privileges to user space through netlink
+                len = strlen(umsg);
+
+                i = 7;
+                while (umsg[i] == ' ' && i < len) {
+                    i ++;
+                }
+                while (umsg[i] != ' ' && i < len) {
+                    temp_len = strlen(exe_);
+                    exe_[temp_len] = umsg[i];
+                    exe_[temp_len+1] = '\0';
+                    i ++;
+                }
+                
+                while (umsg[i] == ' ' && i < len) {
+                    i ++;
+                }
+                while (umsg[i] != ' ' && i < len) {
+                    temp_len = strlen(type_);
+                    type_[temp_len] = umsg[i];
+                    type_[temp_len+1] = '\0';
+                    i ++;
+                }
+
+                printk(KERN_INFO "delete:%s,%s\n", exe_, type_);
+            } else if (strstr(umsg, "list") != NULL) {
+                printk(KERN_INFO "index: %d\n", privilege_index);
             }
             if (strcmp(command_, "add") == 0) {
-                add_privilege(exe_file_, write_, read_, kind_);
-            } else if (strcmp(command_, "modify") == 0) {
-                modify_privilege(exe_file_, write_, read_, kind_, 0);
+                add_privilege(exe_, type_, write_, read_);
+            } else if (strcmp(command_, "update") == 0) {
+                update_privilege(exe_, type_, write_, read_);
             } else if (strcmp(command_, "delete") == 0) {
-                delete_privilege(exe_file_, write_, read_, kind_, 0);
+                delete_privilege(exe_, type_, 0);
             }
         }
     }
 }
 
 struct netlink_kernel_cfg cfg = {
-    .input = rcv_msg,
+    .input = my_rcv_msg,
 };
 
 int init_netlink(void) {
@@ -129,7 +183,7 @@ int init_netlink(void) {
 
     nlsk = (struct sock *)netlink_kernel_create(&init_net, NETLINK_TEST, &cfg);
     if (!nlsk) {
-        printk(KERN_INFO, "netlink kernel create error\n");
+        printk(KERN_INFO "netlink kernel create error\n");
         return -1;
     }
 
