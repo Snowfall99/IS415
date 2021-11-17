@@ -125,7 +125,7 @@ bool parseCmd(std::string line_, std::string& cmd_, std::string& exe_, std::vect
                 type.first = "type";
                 i += 2;
                 while (line_[i] == ' ' && i < len) {
-                    i ++:
+                    i ++;
                 }
                 std::string t;
                 while (line_[i] != ' ' && i < len) {
@@ -139,7 +139,7 @@ bool parseCmd(std::string line_, std::string& cmd_, std::string& exe_, std::vect
                 option.first = "write";
                 i += 2;
                 while (line_[i] == ' ' && i < len) {
-                    i ++:
+                    i ++;
                 }
                 option.second = (line_[i] - '0');
                 options_.push_back(option);
@@ -148,7 +148,7 @@ bool parseCmd(std::string line_, std::string& cmd_, std::string& exe_, std::vect
                 option.first = "read";
                 i += 2;
                 while (line_[i] == ' ' && i < len) {
-                    i ++:
+                    i ++;
                 }
                 option.second = (line_[i] - '0');
                 options_.push_back(option);
@@ -209,9 +209,10 @@ Privilege genPrivilege(std::string exe_, std::string type_, std::vector<std::pai
 
 void listPrivileges() {
     char msg[64];
+    char resp[1024];
     std::sprintf(msg, "%-54s", LIST.c_str());
     my_send_msg(msg);
+
     // TODO
-    // send list msg to kernel 
-    // wait for response
+    // request privileges from kernel
 }

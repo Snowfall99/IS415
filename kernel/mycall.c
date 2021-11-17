@@ -7,7 +7,7 @@
 #include <linux/errno.h>
 #include <linux/string.h>
 
-#include "netlink.c"
+#include "netlink.h"
 
 char* my_get_type(char filename[]) {
     char* token = "";
