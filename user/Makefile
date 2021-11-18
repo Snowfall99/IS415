@@ -1,2 +1,2 @@
 all:
-	g++ cli.cc -o cli -lreadline
+	g++ cli.cc -o cli -lreadline -pthread

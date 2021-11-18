@@ -8,7 +8,7 @@
 
 
 #define NETLINK_TEST 30
-#define MSG_LEN 128
+#define MSG_LEN 1024
 #define MAX_PAYLOAD 128
 
 struct user_msg_info {
@@ -105,8 +105,9 @@ int my_recv_msg(char* umsg_) {
         close(sk_fd);
         exit(-1);
     }
-    
-    umsg_ = u_info.msg;
+
+    strcpy(umsg_, u_info.msg);
+
     close(sk_fd);
     free((void *)nlh);
     return 0;

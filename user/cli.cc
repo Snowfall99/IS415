@@ -1,5 +1,6 @@
 #include <iostream>
 #include <iomanip>
+#include <thread>
 #include <cstring>
 #include <cstdio>
 #include <string>
@@ -28,7 +29,9 @@ struct Privilege {
     Privilege(std::string exe_, std::string type_, int write_=0, int read_=0) : exe(exe_), type(type_), write(write_), read(read_) {} 
 };
 
+void listenDaemon();
 void showHelp();
+void handleCmd(std::string);
 bool parseCmd(std::string, std::string&, std::string&, std::vector<std::pair<std::string, int> >&, std::pair<std::string, std::string>&);
 bool checkOpt(std::vector<std::pair<std::string ,int> >);
 void listPrivileges();
@@ -54,22 +57,46 @@ int main(int argc, char** argv) {
         } else if (lineStr == "list") {
             listPrivileges();
         } else {
-            std::string cmd;
-            std::string exe;
-            std::vector<std::pair<std::string, int> > options;
-            std::pair<std::string, std::string> type;
-            if (!parseCmd(lineStr, cmd, exe, options, type)) {
-                continue;
-            }
-            if (!checkOpt(options)) {
-                continue;
-            }
-            Privilege privilege = genPrivilege(exe, type.second, options);
-            char msg[64];
-            std::sprintf(msg, "%-16s %-16s %-16s %d %d", cmd.c_str(), privilege.exe.c_str(), privilege.type.c_str(), privilege.write, privilege.read);
-            my_send_msg(msg);
+            handleCmd(lineStr);
         }
     }
+    return 0;
+}
+
+void handleCmd(std::string line_) {
+    std::string cmd;
+    std::string exe;
+    std::vector<std::pair<std::string, int> > options;
+    std::pair<std::string, std::string> type;
+    if (!parseCmd(line_, cmd, exe, options, type)) {
+        return;
+    }
+    if (!checkOpt(options)) {
+        return;
+    }
+    std::thread listenTh(listenDaemon);
+    Privilege privilege = genPrivilege(exe, type.second, options);
+    char msg[64];
+    std::sprintf(msg, "%-16s %-16s %-16s %d %d", cmd.c_str(), privilege.exe.c_str(), privilege.type.c_str(), privilege.write, privilege.read);
+    my_send_msg(msg);
+    listenTh.join();
+    return;
+}
+
+void listenDaemon() {
+    char resp[1024];
+    int ret;
+
+    ret = my_recv_msg(resp);
+    if (ret == 0) {
+        if (strcmp(resp, "success\n") == 0) {
+            return;
+        }
+        std::cout << resp << std::endl;
+    } else {
+        std::cout << "fail to recvfrom netlink" << std::endl;
+    }
+    return;
 }
 
 void showHelp() {
@@ -208,11 +235,12 @@ Privilege genPrivilege(std::string exe_, std::string type_, std::vector<std::pai
 }
 
 void listPrivileges() {
+    std::thread listenTh(listenDaemon);
     char msg[64];
     char resp[1024];
     std::sprintf(msg, "%-54s", LIST.c_str());
     my_send_msg(msg);
-
-    // TODO
-    // request privileges from kernel
+    sleep(1);
+    listenTh.join();
+    return;
 }
