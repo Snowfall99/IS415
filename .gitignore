@@ -8,3 +8,8 @@ test
 *.o
 *.mod.c
 cli
+Cargo.lock
+target/
+test.rs
+cli.yaml
+.DS_Store
