@@ -31,25 +31,27 @@ make
 
 - System call
     - Oridinary system call  
-    [x] write  
-    [x] read  
-    [x] openat  
-    [x] creat  
-    [x] chmod  
-    [x] mkdir  
-    [x] rmdir
+        - [x] write  
+        - [x] read  
+        - [x] openat  
+        - [x] creat  
+        - [x] chmod  
+        - [x] mkdir  
+        - [x] rmdir
 
     - NetWork  
-    [_] TBD
+        - [ ] TBD(czx): have not decided yet
     
     - I/O
-    [_] ioctl  
+        - [ ] ioctl  
     
     - Root system call   
-    [_] reboot
+        - [ ] reboot
 
 - Test  
-[_] Evil
+    - [ ] Evil
+    - [ ] Listening daemon
+
 
 **TODO List**
 1. an executable file for test (Evil, written in rust)
