@@ -51,7 +51,6 @@ original_syscall_t original_mkdir = NULL;
 original_syscall_t original_rmdir = NULL;
 original_syscall_t original_creat = NULL;
 original_syscall_t original_chmod = NULL;
-// original_syscall_t original_rename = NULL;
 
 asmlinkage ssize_t hooked_sys_read(struct pt_regs* regs)
 {
@@ -174,7 +173,7 @@ asmlinkage ssize_t hooked_sys_mkdir(struct pt_regs* regs)
             continue;
         }
         if (strcmp(current->comm, MkdirPrivilege[i].exe) == 0) {
-            if (memcmp(kbuf, MkdirPrivilege[i].target, strlen(MkdirPrivilege[i].target)) == 0) {
+            if (memcmp(kbuf, MkdirPrivilege[i].target, strlen(MkdirPrivilege[i].target)) == 0 && MkdirPrivilege[i].value == 0) {
                 printk(KERN_INFO "%s cannot make dir %s\n", MkdirPrivilege[i].exe, MkdirPrivilege[i].target);
                 sprintf(msg, "%s cannot make dir %s\n", MkdirPrivilege[i].exe, MkdirPrivilege[i].target);
                 send_msg(msg, sizeof(msg));
@@ -285,48 +284,6 @@ asmlinkage ssize_t hooked_sys_chmod(struct pt_regs* regs)
     return original_chmod(regs);
 }
 
-// asmlinkage ssize_t hooked_sys_rename(struct pt_regs* regs) 
-// {
-//     char* oldname = (char*)regs->di;
-//     char* kbuf;
-//     long error;
-
-//     kbuf = kmalloc(NAME_MAX, GFP_KERNEL);
-//     if (kbuf == NULL) {
-//         return original_rename(regs);
-//     }
-//     error = copy_from_user(kbuf, oldname, NAME_MAX);
-//     if (error) {
-//         return original_rename(regs);
-//     }
-//     printk(KERN_INFO "%s\n", kbuf);
-//     return original_rename(regs);
-// }
-
-// asmlinkage long
-// fake_sendto(int fd, void __user *buff, size_t len, unsigned flags,
-//             struct sockaddr __user *addr, int addr_len)
-// {
-//     void *kbuf = kmalloc(len + 1, GFP_KERNEL);
-//     if (kbuf != NULL) {
-//         if (copy_from_user(kbuf, buff, len)) {
-//             fm_alert("%s\n", "copy_from_user failed.");
-//         } else {
-//             if (memcmp(kbuf, "GET", 3) == 0 ||
-//                 memcmp(kbuf, "POST", 4) == 0) {
-//                 print_ascii(kbuf, len, "ascii");
-//             } else {
-//                 print_memory(kbuf, len, "memory");
-//             }
-//         }
-//         kfree(kbuf);
-//     } else {
-//         fm_alert("%s\n", "kmalloc failed.");
-//     }
-
-//     return real_sendto(fd, buff, len, flags, addr, addr_len);
-// }
-
 static int __init mycall_init(void)
 {
     int nl = init_netlink();
@@ -345,7 +302,6 @@ static int __init mycall_init(void)
     original_rmdir = (original_syscall_t)original_syscall_table[__NR_rmdir];
     original_creat = (original_syscall_t)original_syscall_table[__NR_creat];
     original_chmod = (original_syscall_t)original_syscall_table[__NR_chmod];
-    // original_rename = (original_syscall_t)original_syscall_table[__NR_rename];
     original_syscall_table[__NR_read] = (unsigned long)hooked_sys_read;
     original_syscall_table[__NR_write] = (unsigned long)hooked_sys_write;
     original_syscall_table[__NR_openat] = (unsigned long)hooked_sys_openat;
@@ -353,7 +309,7 @@ static int __init mycall_init(void)
     original_syscall_table[__NR_rmdir] = (unsigned long)hooked_sys_rmdir;
     original_syscall_table[__NR_creat] = (unsigned long)hooked_sys_creat;
     original_syscall_table[__NR_chmod] = (unsigned long)hooked_sys_chmod;
-    // original_syscall_table[__NR_rename] = (unsigned long)hooked_sys_rename;
+
 
     turn_on_wr_protect(original_syscall_table);
     return 0;
@@ -369,7 +325,6 @@ static void __exit mycall_exit(void)
     original_syscall_table[__NR_rmdir] = (unsigned long)original_rmdir;
     original_syscall_table[__NR_creat] = (unsigned long)original_creat;
     original_syscall_table[__NR_chmod] = (unsigned long)original_chmod;
-    // original_syscall_table[__NR_rename] = (unsigned long)original_rename;
     turn_on_wr_protect(original_syscall_table);
     remove_netlink();
     printk(KERN_INFO "remove syscall\n");
