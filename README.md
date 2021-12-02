@@ -30,10 +30,7 @@ make
     - [x] netlink  
 
 - System call
-    - Oridinary system call  
-        - [x] write  
-        - [x] read  
-        - [x] openat  
+    - File 
         - [x] creat  
         - [x] chmod  
         - [x] mkdir  
@@ -43,19 +40,18 @@ make
         - [ ] TBD(czx): have not decided yet
     
     - I/O
-        - [ ] ioctl  
+        - [x] write  
+        - [x] read  
+        - [x] openat 
     
     - Root system call   
         - [ ] reboot
 
 - Test  
     - [x] Evil
-    - [ ] Listening daemon
+    - [x] Listening daemon
 
 **TODO List**
-1. fixup(core dumped twice, but I have no idea about the reason)
-2. ioctl
-3. net syscall
-4. reboot
-5. a more attractive CLI (use tmux for pre?)
-6. whitelisting (bitmap)
+1. complete chmod, rmdir, mkdir and craet and test condition
+2. a more attractive CLI (use tmux for pre?)
+3. whitelisting (bitmap)
