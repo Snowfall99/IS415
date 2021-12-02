@@ -53,10 +53,9 @@ make
     - [ ] Listening daemon
 
 **TODO List**
-1. a listening daemon for display privileges (rust) 
-2. fixup(core dumped twice, but I have no idea about the reason)
-3. ioctl
-4. net syscall
-5. reboot
-6. a more attractive CLI (use tmux for pre?)
-7. whitelisting (bitmap)
+1. fixup(core dumped twice, but I have no idea about the reason)
+2. ioctl
+3. net syscall
+4. reboot
+5. a more attractive CLI (use tmux for pre?)
+6. whitelisting (bitmap)
