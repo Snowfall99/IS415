@@ -24,10 +24,10 @@ make
 
 **Roadmap**  
 - CLI
-[x] firmiana
+    - [x] firmiana
 
 - Netlink  
-[x] netlink  
+    - [x] netlink  
 
 - System call
     - Oridinary system call  
@@ -49,15 +49,14 @@ make
         - [ ] reboot
 
 - Test  
-    - [ ] Evil
+    - [x] Evil
     - [ ] Listening daemon
 
 **TODO List**
-1. an executable file for test (Evil, written in rust)
-2. a listening daemon for display privileges (rust) 
-3. fixup(core dumped twice, but I have no idea about the reason)
-4. ioctl
-5. net syscall
-6. reboot
+1. a listening daemon for display privileges (rust) 
+2. fixup(core dumped twice, but I have no idea about the reason)
+3. ioctl
+4. net syscall
+5. reboot
 6. a more attractive CLI (use tmux for pre?)
-8. whitelisting (bitmap)
+7. whitelisting (bitmap)
