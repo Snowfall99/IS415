@@ -4,7 +4,6 @@
 #include <linux/unistd.h>
 #include <linux/kallsyms.h>
 #include <linux/fdtable.h>
-#include <linux/socket.h>
 #include <linux/errno.h>
 #include <linux/string.h>
 
@@ -310,6 +309,7 @@ static int __init mycall_init(void)
     original_syscall_table[__NR_rmdir] = (unsigned long)hooked_sys_rmdir;
     original_syscall_table[__NR_creat] = (unsigned long)hooked_sys_creat;
     original_syscall_table[__NR_chmod] = (unsigned long)hooked_sys_chmod;
+
 
     turn_on_wr_protect(original_syscall_table);
     return 0;
