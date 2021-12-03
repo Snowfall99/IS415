@@ -20,7 +20,24 @@ make
 ```
 
 **Usage**  
-// TODO(czx): to be implemented
+0. Kernel module:  
+```
+cd kernel
+sudo insmod mycall.ko
+sudo rmmod mycall
+```  
+1. Firmiana:  
+```
+cd firmiana
+sudo cp firmiana /usr/bin/firmiana
+firmiana help
+firmiana <subcommand> <flags> 
+```
+2. Evil:  
+```
+cd evil
+cargo run <subcommand>
+```
 
 **Roadmap**  
 - CLI
