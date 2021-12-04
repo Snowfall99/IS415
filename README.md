@@ -20,7 +20,24 @@ make
 ```
 
 **Usage**  
-// TODO(czx): to be implemented
+0. Kernel module:  
+```
+cd kernel
+sudo insmod mycall.ko
+sudo rmmod mycall
+```  
+1. Firmiana:  
+```
+cd firmiana
+sudo cp firmiana /usr/bin/firmiana
+firmiana help
+firmiana <subcommand> <flags> 
+```
+2. Evil:  
+```
+cd evil
+cargo run <subcommand>
+```
 
 **Roadmap**  
 - CLI
@@ -52,6 +69,5 @@ make
     - [x] Listening daemon
 
 **TODO List**
-1. complete chmod, rmdir, mkdir and craet and test condition
-2. a more attractive CLI (use tmux for pre?)
-3. whitelisting (bitmap)
+1. a more attractive CLI (use tmux for pre?)
+2. whitelisting (bitmap)

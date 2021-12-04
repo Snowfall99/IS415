@@ -151,7 +151,7 @@ int main(int argc, char** argv) {
             firmiana.Error(_flag);
             return 1;
         }
-        if (argv[i+1][0] != '-') {
+        if (i+1 < argc && argv[i+1][0] != '-') {
             i ++;
             flag.SetValue(argv[i]);
         }
