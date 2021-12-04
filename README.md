@@ -69,6 +69,9 @@ cargo run <subcommand>
     - [x] Listening daemon
 
 **TODO List**
-1. complete chmod, rmdir, mkdir and craet and test condition
-2. a more attractive CLI (use tmux for pre?)
-3. whitelisting (bitmap)
+1. a more attractive CLI (use tmux for pre?)
+2. whitelisting (bitmap)
+3. shell script
+4. document
+5. comment
+6. wrap
