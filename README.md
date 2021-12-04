@@ -69,10 +69,9 @@ cargo run <subcommand>
     - [x] Listening daemon
 
 **TODO List**
-1. a more attractive CLI (use tmux for pre?)
-2. whitelisting (bitmap)
-3. shell script
+1. mkdir/rmdir are supposed to target all directories
 4. document
 5. comment
 6. wrap
-
+7. output read content 
+8. colorful commandline msg
