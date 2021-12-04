@@ -204,7 +204,7 @@ private:
             filename = sc_.FindByLongName("filename").GetValue();    
         }
         if (sc_.FindByLongName("pathname").GetValue() != "") {
-            filename = sc_.FindByLongName("pathname").GetValue();    
+            pathname = sc_.FindByLongName("pathname").GetValue();    
         }
         if ((write = sc_.FindByLongName("write").GetValue()) != "") {
             std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", "write", exe.c_str(), type.c_str(), (write[0] - '0'));
@@ -219,15 +219,15 @@ private:
             my_send_msg(msg);
         }
         if ((chmod = sc_.FindByLongName("chmod").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", "chmod", exe.c_str(), filename.c_str(), (chmod[0] - '0'));
+            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", "chmod", exe.c_str(), type.c_str(), (chmod[0] - '0'));
             my_send_msg(msg);
         }
         if ((mkdir = sc_.FindByLongName("mkdir").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", "mkdir", exe.c_str(), pathname.c_str(), (mkdir[0] - '0'));
+            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", "mkdir", exe.c_str(), type.c_str(), (mkdir[0] - '0'));
             my_send_msg(msg);
         }
         if ((rmdir = sc_.FindByLongName("rmdir").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", "rmdir", exe.c_str(), pathname.c_str(), (rmdir[0] - '0'));
+            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", "rmdir", exe.c_str(), type.c_str(), (rmdir[0] - '0'));
             my_send_msg(msg);
         }
         if ((creat = sc_.FindByLongName("creat").GetValue()) != "") {
@@ -259,7 +259,7 @@ private:
             filename = sc_.FindByLongName("filename").GetValue();    
         }
         if (sc_.FindByLongName("pathname").GetValue() != "") {
-            filename = sc_.FindByLongName("pathname").GetValue();    
+            pathname = sc_.FindByLongName("pathname").GetValue();    
         }
         if ((write = sc_.FindByLongName("write").GetValue()) != "") {
             std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", "write", exe.c_str(), type.c_str(), (write[0] - '0'));
@@ -274,15 +274,15 @@ private:
             my_send_msg(msg);
         }
         if ((chmod = sc_.FindByLongName("chmod").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", "chmod", exe.c_str(), filename.c_str(), (chmod[0] - '0'));
+            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", "chmod", exe.c_str(), type.c_str(), (chmod[0] - '0'));
             my_send_msg(msg);
         }
         if ((mkdir = sc_.FindByLongName("mkdir").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", "mkdir", exe.c_str(), pathname.c_str(), (mkdir[0] - '0'));
+            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", "mkdir", exe.c_str(), type.c_str(), (mkdir[0] - '0'));
             my_send_msg(msg);
         }
         if ((rmdir = sc_.FindByLongName("rmdir").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", "rmdir", exe.c_str(), pathname.c_str(), (rmdir[0] - '0'));
+            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", "rmdir", exe.c_str(), type.c_str(), (rmdir[0] - '0'));
             my_send_msg(msg);
         }
         if ((creat = sc_.FindByLongName("creat").GetValue()) != "") {
@@ -307,35 +307,14 @@ private:
             filename = sc_.FindByLongName("filename").GetValue();    
         }
         if (sc_.FindByLongName("pathname").GetValue() != "") {
-            filename = sc_.FindByLongName("pathname").GetValue();    
+            pathname = sc_.FindByLongName("pathname").GetValue();    
         }
-        if (sc_.FindByLongName("write").GetValue() != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s", "delete", "write", exe.c_str(), type.c_str());
-            my_send_msg(msg);
-        }
-        if ( sc_.FindByLongName("read").GetValue() != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s", "delete", "read", exe.c_str(), type.c_str());
-            my_send_msg(msg);
-        }
-        if (sc_.FindByLongName("open").GetValue() != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s", "delete", "open", exe.c_str(), type.c_str());
-            my_send_msg(msg);
-        }
-        if (sc_.FindByLongName("creat").GetValue() != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s", "delete", "creat", exe.c_str(), type.c_str());
-            my_send_msg(msg);
-        }
-        if (sc_.FindByLongName("chmod").GetValue() != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s", "delete", "chmod", exe.c_str(), filename.c_str());
-            my_send_msg(msg);
-        }
-        if (sc_.FindByLongName("mkdir").GetValue() != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s", "delete", "mkdir", exe.c_str(), pathname.c_str());
-            my_send_msg(msg);
-        }
-        if (sc_.FindByLongName("rmdir").GetValue() != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s", "delete", "rmdir", exe.c_str(), pathname.c_str());
-            my_send_msg(msg);
+        for (auto flag : sc_.GetFlags()) {
+            if (flag.GetLongName() != "exe" && flag.GetLongName() != "type" && 
+            flag.GetLongName() != "filename" && flag.GetLongName() != "pathname") {
+                std::sprintf(msg, "%-8s %-8s %-8s %-16s", "delete", flag.GetLongName().c_str(), exe.c_str(), type.c_str());
+                my_send_msg(msg);
+            }
         }
         return;
     }
@@ -430,6 +409,7 @@ public:
         for (auto flag : sc_.GetFlags()) {
             if (standard.FindByLongName(flag.GetLongName()).NeedValue() && flag.GetValue() == "") {
                 std::cout << "\033[031error\033[0m: " << flag.GetKey() << " need a value but not set" << std::endl << std::endl;
+                return;
             }
         }
         if (sc_.GetName() == "ADD") {
