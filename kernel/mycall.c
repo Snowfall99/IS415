@@ -4,7 +4,6 @@
 #include <linux/unistd.h>
 #include <linux/kallsyms.h>
 #include <linux/fdtable.h>
-#include <linux/socket.h>
 #include <linux/errno.h>
 #include <linux/string.h>
 
