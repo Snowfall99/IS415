@@ -319,6 +319,13 @@ private:
         return;
     }
 
+    void listPrivilege() {
+        char msg[64];
+        std::sprintf(msg, "%-8s %-34s", "list", " ");
+        my_send_msg(msg);
+        return;
+    }
+
 public:
     Firmiana(std::string name_) : name(name_) {}
     
@@ -418,6 +425,8 @@ public:
             updatePrivilege(sc_);
         } else if (sc_.GetName() == "DELETE") {
             deletePrivilege(sc_);
+        } else if (sc_.GetName() == "LIST") {
+            listPrivilege();
         }
         return;
     }

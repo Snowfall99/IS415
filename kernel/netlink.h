@@ -18,7 +18,7 @@ unsigned int msg_array[1024];
 void add_privilege(char*, char*, char*, int);
 void update_privilege(char*, char*, char*, int);
 void delete_privilege(char*, char*, char*);
-// void list_privilege(void);
+void list_privilege(void);
 
 int send_msg(char* pbuf, uint16_t len) {
     struct sk_buff *nl_skb;
@@ -111,12 +111,74 @@ static void my_rcv_msg(struct sk_buff *skb) {
                 update_privilege(privilege_, exe_, type_, value_);
             } else if (strcmp(command_, "delete") == 0) {
                 delete_privilege(privilege_, exe_, type_);
+            } else if (strcmp(command_, "list") == 0) {
+                list_privilege();
             }
-            // } else if (strcmp(command_, "list") == 0) {
-            //     list_privilege();
-            // }
         }
     }
+}
+
+void list_privilege(void) {
+    char msg[64];
+    int i;
+
+    sprintf(msg, "%-16s\n", "write");
+    send_msg(msg, strlen(msg));
+    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
+        if (WritePrivilege[i].tombstone) {
+            sprintf(msg, "%-16s %-16s %d", WritePrivilege[i].exe, WritePrivilege[i].target, WritePrivilege[i].value);
+            send_msg(msg, strlen(msg));
+        }
+    }
+    sprintf(msg, "%-16s\n", "read");
+    send_msg(msg, strlen(msg));
+    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
+        if (ReadPrivilege[i].tombstone) {
+            sprintf(msg, "%-16s %-16s %d", ReadPrivilege[i].exe, ReadPrivilege[i].target, ReadPrivilege[i].value);
+            send_msg(msg, strlen(msg));
+        }
+    }
+    sprintf(msg, "%-16s\n", "open");
+    send_msg(msg, strlen(msg));
+    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
+        if (OpenPrivilege[i].tombstone) {
+            sprintf(msg, "%-16s %-16s %d", OpenPrivilege[i].exe, OpenPrivilege[i].target, OpenPrivilege[i].value);
+            send_msg(msg, strlen(msg));
+        }
+    }
+    sprintf(msg, "%-16s\n", "mkdir");
+    send_msg(msg, strlen(msg));
+    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
+        if (MkdirPrivilege[i].tombstone) {
+            sprintf(msg, "%-16s %-16s %d", MkdirPrivilege[i].exe, MkdirPrivilege[i].target, MkdirPrivilege[i].value);
+            send_msg(msg, strlen(msg));
+        }
+    }
+    sprintf(msg, "%-16s\n", "rmdir");
+    send_msg(msg, strlen(msg));
+    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
+        if (RmdirPrivilege[i].tombstone) {
+            sprintf(msg, "%-16s %-16s %d", RmdirPrivilege[i].exe, RmdirPrivilege[i].target, RmdirPrivilege[i].value);
+            send_msg(msg, strlen(msg));
+        }
+    }
+    sprintf(msg, "%-16s\n", "chmod");
+    send_msg(msg, strlen(msg));
+    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
+        if (ChmodPrivilege[i].tombstone) {
+            sprintf(msg, "%-16s %-16s %d", ChmodPrivilege[i].exe, ChmodPrivilege[i].target, ChmodPrivilege[i].value);
+            send_msg(msg, strlen(msg));
+        }
+    }
+    sprintf(msg, "%-16s\n", "creat");
+    send_msg(msg, strlen(msg));
+    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
+        if (CreatPrivilege[i].tombstone) {
+            sprintf(msg, "%-16s %-16s %d", CreatPrivilege[i].exe, CreatPrivilege[i].target, CreatPrivilege[i].value);
+            send_msg(msg, strlen(msg));
+        }
+    }
+    return;
 }
 
 void add_write(char* exe_, char* target_, int value_) {
@@ -603,32 +665,6 @@ void delete_privilege(char* privilege_, char* exe_, char* target_) {
     }
     return;
 }
-
-// void list_privilege(void) {
-//     int i;
-//     char* resp;
-//     char pri[64];
-//     int count = 0;
-
-//     resp = kmalloc(1024, GFP_KERNEL);
-//     printk(KERN_INFO "total count: %d\n", total_count);
-//     sprintf(pri, "%-16s%-16s%-8s%-8s%-8s\n", "exe", "type", "write", "read", "open");
-//     strcat(resp, pri);
-//     for (i = 0; i < MAX_PRIVILEGE_NUM; i ++) {
-//         if (p[i].tombstone) {
-//             printk(KERN_INFO "i: %d\n", i);
-//             sprintf(pri, "%-16s%-16s%-8d%-8d%-8d\n", p[i].exe, p[i].type, p[i].write, p[i].read, p[i].open);
-//             strcat(resp, pri);
-//             count ++;
-//             if (count == total_count) {
-//                 break;
-//             }        
-//         }
-//     }
-//     printk(KERN_INFO "%s\n", resp);
-//     send_msg(resp, strlen(resp));
-//     return;
-// }
 
 struct netlink_kernel_cfg cfg = {
     .input = my_rcv_msg,

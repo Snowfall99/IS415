@@ -137,11 +137,11 @@ fn chmod() -> std::io::Result<()> {
 }
 
 fn mkdir() -> std::io::Result<()> {
-    fs::create_dir("./new")?;
+    fs::create_dir("new")?;
     Ok(())
 }
 
 fn rmdir() -> std::io::Result<()> {
-    fs::remove_dir("./new")?;
+    fs::remove_dir("new")?;
     Ok(())
 }
