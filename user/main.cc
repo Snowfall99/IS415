@@ -114,6 +114,10 @@ int main(int argc, char** argv) {
     deleteCmd.AddFlag(rmdirFlag);
     subcommands.push_back(deleteCmd);
 
+    Subcommand listCmd("LIST");
+    listCmd.SetDescription("list all privileges");
+    subcommands.push_back(listCmd);
+
     firmiana.AddSubcommands(subcommands);
 
     if (argc == 1) {
