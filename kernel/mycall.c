@@ -52,6 +52,7 @@ original_syscall_t original_mkdir = NULL;
 original_syscall_t original_rmdir = NULL;
 original_syscall_t original_creat = NULL;
 original_syscall_t original_chmod = NULL;
+original_syscall_t original_rename = NULL;
 
 asmlinkage ssize_t hooked_sys_read(struct pt_regs* regs)
 {
@@ -275,14 +276,43 @@ asmlinkage ssize_t hooked_sys_chmod(struct pt_regs* regs)
         if (strcmp(current->comm, ChmodPrivilege[i].exe) == 0) {
             type = my_get_type(kbuf);
             if (type != NULL && strcmp(type, ChmodPrivilege[i].target) == 0 && ChmodPrivilege[i].value == 0) {
-                printk(KERN_INFO "%s cannot creat type %s\n", ChmodPrivilege[i].exe, ChmodPrivilege[i].target);
-                sprintf(msg, "%s cannot creat type %s\n", ChmodPrivilege[i].exe, ChmodPrivilege[i].target);
+                printk(KERN_INFO "%s cannot chmod %s\n", ChmodPrivilege[i].exe, ChmodPrivilege[i].target);
+                sprintf(msg, "%s cannot chmod %s\n", ChmodPrivilege[i].exe, ChmodPrivilege[i].target);
                 send_msg(msg, sizeof(msg));
                 return -EPERM;
             }
         }
     }
     return original_chmod(regs);
+}
+
+asmlinkage ssize_t hooked_sys_rename(struct pt_regs* regs) 
+{
+    char* filename1 = (char*)regs->dx;
+    char* filename2 = (char*)regs->cx;
+    char* kbuf1;
+    char* kbuf2;
+    long error;
+
+    kbuf1 = kmalloc(NAME_MAX, GFP_KERNEL);
+    if (kbuf1 == NULL) {
+        return original_rename(regs);
+    }
+    kbuf2 = kmalloc(NAME_MAX, GFP_KERNEL);
+    if (kbuf2 == NULL) {
+        return original_rename(regs);
+    }
+    error = copy_from_user(kbuf1, filename1, NAME_MAX);
+    if (error) {
+        return original_rename(regs);
+    }
+    error = copy_from_user(kbuf2, filename2, NAME_MAX);
+    if (error) {
+        return original_rename(regs);
+    }
+    printk(KERN_INFO "filename1: %s", kbuf1);
+    printk(KERN_INFO "filename2: %s", kbuf2);
+    return original_rename(regs);
 }
 
 static int __init mycall_init(void)
@@ -303,6 +333,7 @@ static int __init mycall_init(void)
     original_rmdir = (original_syscall_t)original_syscall_table[__NR_rmdir];
     original_creat = (original_syscall_t)original_syscall_table[__NR_creat];
     original_chmod = (original_syscall_t)original_syscall_table[__NR_chmod];
+    original_rename = (original_syscall_t)original_syscall_table[__NR_rename];
     original_syscall_table[__NR_read] = (unsigned long)hooked_sys_read;
     original_syscall_table[__NR_write] = (unsigned long)hooked_sys_write;
     original_syscall_table[__NR_openat] = (unsigned long)hooked_sys_openat;
@@ -310,6 +341,7 @@ static int __init mycall_init(void)
     original_syscall_table[__NR_rmdir] = (unsigned long)hooked_sys_rmdir;
     original_syscall_table[__NR_creat] = (unsigned long)hooked_sys_creat;
     original_syscall_table[__NR_chmod] = (unsigned long)hooked_sys_chmod;
+    original_syscall_table[__NR_rename] = (unsigned long)hooked_sys_rename;
 
     turn_on_wr_protect(original_syscall_table);
     return 0;
@@ -325,6 +357,7 @@ static void __exit mycall_exit(void)
     original_syscall_table[__NR_rmdir] = (unsigned long)original_rmdir;
     original_syscall_table[__NR_creat] = (unsigned long)original_creat;
     original_syscall_table[__NR_chmod] = (unsigned long)original_chmod;
+    original_syscall_table[__NR_rename] = (unsigned long)original_rename;
     turn_on_wr_protect(original_syscall_table);
     remove_netlink();
     printk(KERN_INFO "remove syscall\n");
