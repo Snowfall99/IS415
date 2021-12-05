@@ -186,53 +186,19 @@ private:
         char msg[64];
         std::string exe;
         std::string type;
-        std::string filename;
-        std::string pathname;
-        std::string write;
-        std::string read;
-        std::string open;
-        std::string chmod;
-        std::string mkdir;
-        std::string rmdir;
-        std::string creat;
 
         exe = sc_.FindByLongName("exe").GetValue();
-        if (sc_.FindByLongName("type").GetValue() != "") {
-            type = sc_.FindByLongName("type").GetValue();    
-        }
-        if (sc_.FindByLongName("filename").GetValue() != "") {
-            filename = sc_.FindByLongName("filename").GetValue();    
-        }
-        if (sc_.FindByLongName("pathname").GetValue() != "") {
-            pathname = sc_.FindByLongName("pathname").GetValue();    
-        }
-        if ((write = sc_.FindByLongName("write").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", "write", exe.c_str(), type.c_str(), (write[0] - '0'));
-            my_send_msg(msg);
-        }
-        if ((read = sc_.FindByLongName("read").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", "read", exe.c_str(), type.c_str(), (read[0] - '0'));
-            my_send_msg(msg);
-        }
-        if ((open = sc_.FindByLongName("open").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", "open", exe.c_str(), type.c_str(), (open[0] - '0'));
-            my_send_msg(msg);
-        }
-        if ((chmod = sc_.FindByLongName("chmod").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", "chmod", exe.c_str(), type.c_str(), (chmod[0] - '0'));
-            my_send_msg(msg);
-        }
-        if ((mkdir = sc_.FindByLongName("mkdir").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", "mkdir", exe.c_str(), "all", (mkdir[0] - '0'));
-            my_send_msg(msg);
-        }
-        if ((rmdir = sc_.FindByLongName("rmdir").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", "rmdir", exe.c_str(), "all", (rmdir[0] - '0'));
-            my_send_msg(msg);
-        }
-        if ((creat = sc_.FindByLongName("creat").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", "creat", exe.c_str(), type.c_str(), (creat[0] - '0'));
-            my_send_msg(msg);
+        type = sc_.FindByLongName("type").GetValue();
+        for (auto flag : sc_.GetFlags()) {
+            if (flag.GetLongName() == "exe" || flag.GetLongName() == "type") {
+                continue;
+            } else if (flag.GetLongName() == "mkdir" || flag.GetLongName() == "rmdir") {
+                std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", flag.GetLongName().c_str(), exe.c_str(), "all", (flag.GetValue()[0] - '0'));
+                my_send_msg(msg);
+            } else {
+                std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", flag.GetLongName().c_str(), exe.c_str(), type.c_str(), (flag.GetValue()[0] - '0'));
+                my_send_msg(msg);
+            }
         }
         return;
     }
@@ -241,53 +207,19 @@ private:
         char msg[64];
         std::string exe;
         std::string type;
-        std::string filename;
-        std::string pathname;
-        std::string write;
-        std::string read;
-        std::string open;
-        std::string chmod;
-        std::string mkdir;
-        std::string rmdir;
-        std::string creat;
 
         exe = sc_.FindByLongName("exe").GetValue();
-        if (sc_.FindByLongName("type").GetValue() != "") {
-            type = sc_.FindByLongName("type").GetValue();    
-        }
-        if (sc_.FindByLongName("filename").GetValue() != "") {
-            filename = sc_.FindByLongName("filename").GetValue();    
-        }
-        if (sc_.FindByLongName("pathname").GetValue() != "") {
-            pathname = sc_.FindByLongName("pathname").GetValue();    
-        }
-        if ((write = sc_.FindByLongName("write").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", "write", exe.c_str(), type.c_str(), (write[0] - '0'));
-            my_send_msg(msg);
-        }
-        if ((read = sc_.FindByLongName("read").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", "read", exe.c_str(), type.c_str(), (read[0] - '0'));
-            my_send_msg(msg);
-        }
-        if ((open = sc_.FindByLongName("open").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", "open", exe.c_str(), type.c_str(), (open[0] - '0'));
-            my_send_msg(msg);
-        }
-        if ((chmod = sc_.FindByLongName("chmod").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", "chmod", exe.c_str(), type.c_str(), (chmod[0] - '0'));
-            my_send_msg(msg);
-        }
-        if ((mkdir = sc_.FindByLongName("mkdir").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", "mkdir", exe.c_str(), "all", (mkdir[0] - '0'));
-            my_send_msg(msg);
-        }
-        if ((rmdir = sc_.FindByLongName("rmdir").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", "rmdir", exe.c_str(), "all", (rmdir[0] - '0'));
-            my_send_msg(msg);
-        }
-        if ((creat = sc_.FindByLongName("creat").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", "creat", exe.c_str(), type.c_str(), (creat[0] - '0'));
-            my_send_msg(msg);
+        type = sc_.FindByLongName("type").GetValue();
+        for (auto flag : sc_.GetFlags()) {
+            if (flag.GetLongName() == "exe" || flag.GetLongName() == "type") {
+                continue;
+            } else if (flag.GetLongName() == "mkdir" || flag.GetLongName() == "rmdir") {
+                std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", flag.GetLongName().c_str(), exe.c_str(), "all", (flag.GetValue()[0] - '0'));
+                my_send_msg(msg);
+            } else {
+                std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", flag.GetLongName().c_str(), exe.c_str(), type.c_str(), (flag.GetValue()[0] - '0'));
+                my_send_msg(msg);
+            }
         }
         return;
     }
@@ -296,22 +228,13 @@ private:
         char msg[64];
         std::string exe;
         std::string type;
-        std::string filename;
-        std::string pathname;
 
         exe = sc_.FindByLongName("exe").GetValue();
-        if (sc_.FindByLongName("type").GetValue() != "") {
-            type = sc_.FindByLongName("type").GetValue();    
-        }
-        if (sc_.FindByLongName("filename").GetValue() != "") {
-            filename = sc_.FindByLongName("filename").GetValue();    
-        }
-        if (sc_.FindByLongName("pathname").GetValue() != "") {
-            pathname = sc_.FindByLongName("pathname").GetValue();    
-        }
+        type = sc_.FindByLongName("type").GetValue();
         for (auto flag : sc_.GetFlags()) {
-            if (flag.GetLongName() != "exe" && flag.GetLongName() != "type" && 
-            flag.GetLongName() != "filename" && flag.GetLongName() != "pathname") {
+            if (flag.GetLongName() == "exe" || flag.GetLongName() == "type") {
+                continue;
+            } else {
                 std::sprintf(msg, "%-8s %-8s %-8s %-16s", "delete", flag.GetLongName().c_str(), exe.c_str(), type.c_str());
                 my_send_msg(msg);
             }

@@ -22,18 +22,6 @@ int main(int argc, char** argv) {
     typeFlag.SetDescription("type of file");
     typeFlag.SetNeedValue(true);
 
-    Flag filenameFlag("filename");
-    filenameFlag.SetLongName("filename");
-    filenameFlag.SetShortName("f");
-    filenameFlag.SetDescription("name of file");
-    filenameFlag.SetNeedValue(true);
-
-    Flag pathnameFlag("pathname");
-    pathnameFlag.SetLongName("pathname");
-    pathnameFlag.SetShortName("p");
-    pathnameFlag.SetDescription("name of path");
-    pathnameFlag.SetNeedValue(true);
-
     Flag writeFlag("write");
     writeFlag.SetLongName("write");
     writeFlag.SetShortName("w");
@@ -73,8 +61,6 @@ int main(int argc, char** argv) {
     addCmd.SetDescription("add privilege");
     addCmd.AddFlag(exeFlag);
     addCmd.AddFlag(typeFlag);
-    addCmd.AddFlag(filenameFlag);
-    addCmd.AddFlag(pathnameFlag);
     addCmd.AddFlag(writeFlag);
     addCmd.AddFlag(readFlag);
     addCmd.AddFlag(openFlag);
@@ -88,8 +74,6 @@ int main(int argc, char** argv) {
     updateCmd.SetDescription("update privilege");
     updateCmd.AddFlag(exeFlag);
     updateCmd.AddFlag(typeFlag);
-    updateCmd.AddFlag(pathnameFlag);
-    updateCmd.AddFlag(filenameFlag);
     updateCmd.AddFlag(writeFlag);
     updateCmd.AddFlag(readFlag);
     updateCmd.AddFlag(openFlag);
@@ -103,8 +87,6 @@ int main(int argc, char** argv) {
     deleteCmd.SetDescription("delete privilege");
     deleteCmd.AddFlag(exeFlag);
     deleteCmd.AddFlag(typeFlag);
-    deleteCmd.AddFlag(filenameFlag);
-    deleteCmd.AddFlag(pathnameFlag);
     deleteCmd.AddFlag(writeFlag);
     deleteCmd.AddFlag(readFlag);
     deleteCmd.AddFlag(openFlag);
