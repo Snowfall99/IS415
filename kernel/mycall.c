@@ -175,7 +175,7 @@ asmlinkage ssize_t hooked_sys_mkdir(struct pt_regs* regs)
             continue;
         }
         if (strcmp(current->comm, MkdirPrivilege[i].exe) == 0) {
-            if (memcmp(kbuf, MkdirPrivilege[i].target, strlen(MkdirPrivilege[i].target)) == 0 && MkdirPrivilege[i].value == 0) {
+            if (MkdirPrivilege[i].value == 0) {
                 printk(KERN_INFO "%s cannot make dir %s\n", MkdirPrivilege[i].exe, MkdirPrivilege[i].target);
                 sprintf(msg, "%s cannot make dir %s\n", MkdirPrivilege[i].exe, MkdirPrivilege[i].target);
                 send_msg(msg, sizeof(msg));
@@ -207,7 +207,7 @@ asmlinkage ssize_t hooked_sys_rmdir(struct pt_regs* regs)
             continue;
         }
         if (strcmp(current->comm, RmdirPrivilege[i].exe) == 0) {
-            if (memcmp(kbuf, RmdirPrivilege[i].target, strlen(RmdirPrivilege[i].target)) == 0 && RmdirPrivilege[i].value == 0) {
+            if (RmdirPrivilege[i].value == 0) {
                 printk(KERN_INFO "%s cannot remove dir %s\n", RmdirPrivilege[i].exe, RmdirPrivilege[i].target);
                 sprintf(msg, "%s cannot remove dir %s\n", RmdirPrivilege[i].exe, RmdirPrivilege[i].target);
                 send_msg(msg, sizeof(msg));

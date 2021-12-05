@@ -223,11 +223,11 @@ private:
             my_send_msg(msg);
         }
         if ((mkdir = sc_.FindByLongName("mkdir").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", "mkdir", exe.c_str(), type.c_str(), (mkdir[0] - '0'));
+            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", "mkdir", exe.c_str(), "all", (mkdir[0] - '0'));
             my_send_msg(msg);
         }
         if ((rmdir = sc_.FindByLongName("rmdir").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", "rmdir", exe.c_str(), type.c_str(), (rmdir[0] - '0'));
+            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "add", "rmdir", exe.c_str(), "all", (rmdir[0] - '0'));
             my_send_msg(msg);
         }
         if ((creat = sc_.FindByLongName("creat").GetValue()) != "") {
@@ -278,11 +278,11 @@ private:
             my_send_msg(msg);
         }
         if ((mkdir = sc_.FindByLongName("mkdir").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", "mkdir", exe.c_str(), type.c_str(), (mkdir[0] - '0'));
+            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", "mkdir", exe.c_str(), "all", (mkdir[0] - '0'));
             my_send_msg(msg);
         }
         if ((rmdir = sc_.FindByLongName("rmdir").GetValue()) != "") {
-            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", "rmdir", exe.c_str(), type.c_str(), (rmdir[0] - '0'));
+            std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", "rmdir", exe.c_str(), "all", (rmdir[0] - '0'));
             my_send_msg(msg);
         }
         if ((creat = sc_.FindByLongName("creat").GetValue()) != "") {
