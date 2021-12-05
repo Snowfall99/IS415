@@ -3,6 +3,7 @@
 #include <linux/init.h>
 #include <linux/netlink.h>
 #include <linux/types.h>
+#include <linux/delay.h>
 #include <net/sock.h>
 
 #include "privilege.h"
@@ -116,6 +117,7 @@ static void recvMsg(struct sk_buff *skb) {
             } else if (strcmp(command_, "delete") == 0) {
                 deletePrivilege(privilege_, exe_, type_);
             } else if (strcmp(command_, "list") == 0) {
+                printk(KERN_INFO "list");
                 listPrivilege();
             }
         }
@@ -126,12 +128,15 @@ void list(char* privilegeName_, struct Privilege privileges_[]) {
     // used for message sending
     char msg[64];
     int i;
-
+    
+    sprintf(msg, "\033[033m%s\033[0m", privilegeName_);
+    sendMsg(msg, strlen(msg));
+    mdelay(10);
     for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
         if (privileges_[i].tombstone) {
-            sprintf(msg, "%-16s %-16s %d", privileges_[i].exe, privileges_[i].target, privileges_[i].value);
-            sendMsg
-        (msg, strlen(msg));
+            sprintf(msg, "\033[32m%-16s\033[0m \033[34m%-16s\033[0m %d", privileges_[i].exe, privileges_[i].target, privileges_[i].value);
+            sendMsg(msg, strlen(msg));
+            mdelay(10);
         }
     }
     return;
@@ -170,8 +175,7 @@ void add(char* exe_, char* target_, int value_, struct Privilege privileges_[]) 
     // response error msg to user mode
     if (!flag) {
         strcpy(resp, "there is a duplicated privilege existing");
-        sendMsg
-    (resp, strlen(resp));
+        sendMsg(resp, strlen(resp));
         return;
     }
     // insert the privilege into list
@@ -216,8 +220,7 @@ void update(char* exe_, char* target_, int value_, struct Privilege privileges_[
     // if not found, return error message to user mode
     if (i == MAX_PRIVILEGE_NUM) {
         strcpy(resp, "privilege not found");
-        sendMsg
-    (resp, strlen(resp));
+        sendMsg(resp, strlen(resp));
     }
     return;
 }
@@ -256,8 +259,7 @@ void del(char* exe_, char* target_, struct Privilege privileges_[]) {
     // if not found, return error message to user mode
     if (i == MAX_PRIVILEGE_NUM) {
         strcpy(resp, "privilege not found");
-        sendMsg
-    (resp, strlen(resp));
+        sendMsg(resp, strlen(resp));
     }
     return;
 }

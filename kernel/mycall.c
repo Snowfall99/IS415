@@ -72,11 +72,11 @@ asmlinkage ssize_t hooked_sys_read(struct pt_regs* regs) {
             myfile = myfiles->fdt->fd[(unsigned int)regs->di];
             ppath = d_path(&(myfile->f_path), (char *)ppath, 100);
             strcpy(filename, ppath);
-            type = getType(filename);
+            type = my_get_type(filename);
             if (type != NULL && strcmp(type, ReadPrivilege[i].target) == 0 && ReadPrivilege[i].value == 0) {
                 printk(KERN_INFO "%s cannot read type %s\n", ReadPrivilege[i].exe, ReadPrivilege[i].target);
-                sprintf(msg, "%s cannot write type %s\n", ReadPrivilege[i].exe, ReadPrivilege[i].target);
-                sendMsg(msg, sizeof(msg));
+                // sprintf(msg, "%s cannot write type %s", ReadPrivilege[i].exe, ReadPrivilege[i].target);
+                // sendMsg(msg, sizeof(msg));
                 return -EPERM;
             }
         }
@@ -104,11 +104,11 @@ asmlinkage ssize_t hooked_sys_write(struct pt_regs* regs) {
             myfile = myfiles->fdt->fd[(unsigned int)regs->di];
             ppath = d_path(&(myfile->f_path), (char *)ppath, 100);
             strcpy(filename, ppath);
-            type = getType(filename);
+            type = my_get_type(filename);
             if (type != NULL && strcmp(type, WritePrivilege[i].target) == 0 && WritePrivilege[i].value == 0) {
                 printk(KERN_INFO "%s cannot write type %s\n", WritePrivilege[i].exe, WritePrivilege[i].target);
-                sprintf(msg, "%s cannot write type %s\n", WritePrivilege[i].exe, WritePrivilege[i].target);
-                sendMsg(msg, sizeof(msg));
+                // sprintf(msg, "%s cannot write type %s", WritePrivilege[i].exe, WritePrivilege[i].target);
+                // sendMsg(msg, sizeof(msg));
                 return -EPERM;
             } 
         }
@@ -139,8 +139,8 @@ asmlinkage ssize_t hooked_sys_openat(struct pt_regs* regs) {
         if (strcmp(current->comm, OpenPrivilege[i].exe) == 0) {
             if (memcmp(kbuf, OpenPrivilege[i].target , strlen(OpenPrivilege[i].target)) == 0 && OpenPrivilege[i].value == 0) {
                 printk(KERN_INFO "%s cannot open file %s\n", OpenPrivilege[i].exe, OpenPrivilege[i].target);
-                sprintf(msg, "%s cannot open file %s\n", OpenPrivilege[i].exe, OpenPrivilege[i].target);
-                sendMsg(msg, sizeof(msg));
+                // sprintf(msg, "%s cannot open file %s", OpenPrivilege[i].exe, OpenPrivilege[i].target);
+                // sendMsg(msg, sizeof(msg));
                 return -EPERM;
             }
         }
@@ -170,8 +170,8 @@ asmlinkage ssize_t hooked_sys_mkdir(struct pt_regs* regs) {
         if (strcmp(current->comm, MkdirPrivilege[i].exe) == 0) {
             if (MkdirPrivilege[i].value == 0) {
                 printk(KERN_INFO "%s cannot make dir %s\n", MkdirPrivilege[i].exe, MkdirPrivilege[i].target);
-                sprintf(msg, "%s cannot make dir %s\n", MkdirPrivilege[i].exe, MkdirPrivilege[i].target);
-                sendMsg(msg, sizeof(msg));
+                // sprintf(msg, "%s cannot make dir %s", MkdirPrivilege[i].exe, MkdirPrivilege[i].target);
+                // sendMsg(msg, sizeof(msg));
                 return -EPERM;
             }
         }
@@ -201,8 +201,8 @@ asmlinkage ssize_t hooked_sys_rmdir(struct pt_regs* regs) {
         if (strcmp(current->comm, RmdirPrivilege[i].exe) == 0) {
             if (RmdirPrivilege[i].value == 0) {
                 printk(KERN_INFO "%s cannot remove dir %s\n", RmdirPrivilege[i].exe, RmdirPrivilege[i].target);
-                sprintf(msg, "%s cannot remove dir %s\n", RmdirPrivilege[i].exe, RmdirPrivilege[i].target);
-                sendMsg(msg, sizeof(msg));
+                // sprintf(msg, "%s cannot remove dir %s", RmdirPrivilege[i].exe, RmdirPrivilege[i].target);
+                // sendMsg(msg, sizeof(msg));
                 return -EPERM;
             }
         }
@@ -231,11 +231,11 @@ asmlinkage ssize_t hooked_sys_creat(struct pt_regs* regs) {
             continue;
         }
         if (strcmp(current->comm, CreatPrivilege[i].exe) == 0) {
-            type = getType(kbuf);
+            type = my_get_type(kbuf);
             if (type != NULL && strcmp(type, CreatPrivilege[i].target) == 0 && CreatPrivilege[i].value == 0) {
                 printk(KERN_INFO "%s cannot creat type %s\n", CreatPrivilege[i].exe, CreatPrivilege[i].target);
-                sprintf(msg, "%s cannot creat type %s\n", CreatPrivilege[i].exe, CreatPrivilege[i].target);
-                sendMsg(msg, sizeof(msg));
+                // sprintf(msg, "%s cannot creat type %s", CreatPrivilege[i].exe, CreatPrivilege[i].target);
+                // sendMsg(msg, sizeof(msg));
                 return -EPERM;
             }
         }
@@ -264,11 +264,11 @@ asmlinkage ssize_t hooked_sys_chmod(struct pt_regs* regs) {
             continue;
         }
         if (strcmp(current->comm, ChmodPrivilege[i].exe) == 0) {
-            type = getType(kbuf);
+            type = my_get_type(kbuf);
             if (type != NULL && strcmp(type, ChmodPrivilege[i].target) == 0 && ChmodPrivilege[i].value == 0) {
                 printk(KERN_INFO "%s cannot chmod %s\n", ChmodPrivilege[i].exe, ChmodPrivilege[i].target);
-                sprintf(msg, "%s cannot chmod %s\n", ChmodPrivilege[i].exe, ChmodPrivilege[i].target);
-                sendMsg(msg, sizeof(msg));
+                // sprintf(msg, "%s cannot chmod %s", ChmodPrivilege[i].exe, ChmodPrivilege[i].target);
+                // sendMsg(msg, sizeof(msg));
                 return -EPERM;
             }
         }
@@ -309,40 +309,40 @@ static int __init mycall_init(void) {
     if (nl != 0) {
         return -1;
     }
-    originalSyscallTable = getSyscallTable();
-    printk(KERN_INFO "syscall table: %px\n", originalSyscallTable);
-    turnOffWRProtect(originalSyscallTable);
-    original_read = (original_syscall_t)originalSyscallTable[__NR_read];
-    original_write = (original_syscall_t)originalSyscallTable[__NR_write];
-    original_openat = (original_syscall_t)originalSyscallTable[__NR_openat];
-    original_mkdir = (original_syscall_t)originalSyscallTable[__NR_mkdir];
-    original_rmdir = (original_syscall_t)originalSyscallTable[__NR_rmdir];
-    original_creat = (original_syscall_t)originalSyscallTable[__NR_creat];
-    original_chmod = (original_syscall_t)originalSyscallTable[__NR_chmod];
-    original_rename = (original_syscall_t)originalSyscallTable[__NR_rename];
-    originalSyscallTable[__NR_read] = (unsigned long)hooked_sys_read;
-    originalSyscallTable[__NR_write] = (unsigned long)hooked_sys_write;
-    originalSyscallTable[__NR_openat] = (unsigned long)hooked_sys_openat;
-    originalSyscallTable[__NR_mkdir] = (unsigned long)hooked_sys_mkdir;
-    originalSyscallTable[__NR_rmdir] = (unsigned long)hooked_sys_rmdir;
-    originalSyscallTable[__NR_creat] = (unsigned long)hooked_sys_creat;
-    originalSyscallTable[__NR_chmod] = (unsigned long)hooked_sys_chmod;
-    originalSyscallTable[__NR_rename] = (unsigned long)hooked_sys_rename;
-    turnOnWRProtect(originalSyscallTable);
+    original_syscall_table = get_syscall_table();
+    printk(KERN_INFO "syscall table: %px\n", original_syscall_table);
+    turn_off_wr_protect(original_syscall_table);
+    original_read = (original_syscall_t)original_syscall_table[__NR_read];
+    original_write = (original_syscall_t)original_syscall_table[__NR_write];
+    original_openat = (original_syscall_t)original_syscall_table[__NR_openat];
+    original_mkdir = (original_syscall_t)original_syscall_table[__NR_mkdir];
+    original_rmdir = (original_syscall_t)original_syscall_table[__NR_rmdir];
+    original_creat = (original_syscall_t)original_syscall_table[__NR_creat];
+    original_chmod = (original_syscall_t)original_syscall_table[__NR_chmod];
+    original_rename = (original_syscall_t)original_syscall_table[__NR_rename];
+    original_syscall_table[__NR_read] = (unsigned long)hooked_sys_read;
+    original_syscall_table[__NR_write] = (unsigned long)hooked_sys_write;
+    original_syscall_table[__NR_openat] = (unsigned long)hooked_sys_openat;
+    original_syscall_table[__NR_mkdir] = (unsigned long)hooked_sys_mkdir;
+    original_syscall_table[__NR_rmdir] = (unsigned long)hooked_sys_rmdir;
+    original_syscall_table[__NR_creat] = (unsigned long)hooked_sys_creat;
+    original_syscall_table[__NR_chmod] = (unsigned long)hooked_sys_chmod;
+    original_syscall_table[__NR_rename] = (unsigned long)hooked_sys_rename;
+    turn_on_wr_protect(original_syscall_table);
     return 0;
 }
 
 static void __exit mycall_exit(void) {
-    turnOffWRProtect(originalSyscallTable);
-    originalSyscallTable[__NR_read] = (unsigned long)original_read;
-    originalSyscallTable[__NR_write] = (unsigned long)original_write;
-    originalSyscallTable[__NR_openat] = (unsigned long)original_openat;
-    originalSyscallTable[__NR_mkdir] = (unsigned long)original_mkdir;
-    originalSyscallTable[__NR_rmdir] = (unsigned long)original_rmdir;
-    originalSyscallTable[__NR_creat] = (unsigned long)original_creat;
-    originalSyscallTable[__NR_chmod] = (unsigned long)original_chmod;
-    originalSyscallTable[__NR_rename] = (unsigned long)original_rename;
-    turnOnWRProtect(originalSyscallTable);
+    turn_off_wr_protect(original_syscall_table);
+    original_syscall_table[__NR_read] = (unsigned long)original_read;
+    original_syscall_table[__NR_write] = (unsigned long)original_write;
+    original_syscall_table[__NR_openat] = (unsigned long)original_openat;
+    original_syscall_table[__NR_mkdir] = (unsigned long)original_mkdir;
+    original_syscall_table[__NR_rmdir] = (unsigned long)original_rmdir;
+    original_syscall_table[__NR_creat] = (unsigned long)original_creat;
+    original_syscall_table[__NR_chmod] = (unsigned long)original_chmod;
+    original_syscall_table[__NR_rename] = (unsigned long)original_rename;
+    turn_on_wr_protect(original_syscall_table);
     remove_netlink();
     printk(KERN_INFO "remove syscall\n");
 }
