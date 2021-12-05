@@ -22,7 +22,7 @@ make
 **How to test**   
 ```
 sudo insmod mycall.ko
-echo "hello world" > ./evil.txt
+echo "hello world" > ./evil/test.txt
 ./firmiana.sh <subcommand>
 sudo rmmod mycall
 ```  
@@ -56,10 +56,6 @@ sudo rmmod mycall
     - [x] Evil
     - [x] Listening daemon
 
-**TODO List**
-1. mkdir/rmdir are supposed to target all directories
-4. document
-5. comment
-6. wrap
-7. output read content 
-8. colorful commandline msg
+**TODO List**. 
+1. document
+2. list seems not work
