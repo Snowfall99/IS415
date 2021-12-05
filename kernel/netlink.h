@@ -117,7 +117,6 @@ static void recvMsg(struct sk_buff *skb) {
             } else if (strcmp(command_, "delete") == 0) {
                 deletePrivilege(privilege_, exe_, type_);
             } else if (strcmp(command_, "list") == 0) {
-                printk(KERN_INFO "list");
                 listPrivilege();
             }
         }

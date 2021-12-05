@@ -4,7 +4,6 @@
 #include <linux/unistd.h>
 #include <linux/kallsyms.h>
 #include <linux/fdtable.h>
-#include <linux/socket.h>
 #include <linux/errno.h>
 #include <linux/string.h>
 
@@ -72,7 +71,7 @@ asmlinkage ssize_t hooked_sys_read(struct pt_regs* regs) {
             myfile = myfiles->fdt->fd[(unsigned int)regs->di];
             ppath = d_path(&(myfile->f_path), (char *)ppath, 100);
             strcpy(filename, ppath);
-            type = my_get_type(filename);
+            type = getType(filename);
             if (type != NULL && strcmp(type, ReadPrivilege[i].target) == 0 && ReadPrivilege[i].value == 0) {
                 printk(KERN_INFO "%s cannot read type %s\n", ReadPrivilege[i].exe, ReadPrivilege[i].target);
                 // sprintf(msg, "%s cannot write type %s", ReadPrivilege[i].exe, ReadPrivilege[i].target);
@@ -104,7 +103,7 @@ asmlinkage ssize_t hooked_sys_write(struct pt_regs* regs) {
             myfile = myfiles->fdt->fd[(unsigned int)regs->di];
             ppath = d_path(&(myfile->f_path), (char *)ppath, 100);
             strcpy(filename, ppath);
-            type = my_get_type(filename);
+            type = getType(filename);
             if (type != NULL && strcmp(type, WritePrivilege[i].target) == 0 && WritePrivilege[i].value == 0) {
                 printk(KERN_INFO "%s cannot write type %s\n", WritePrivilege[i].exe, WritePrivilege[i].target);
                 // sprintf(msg, "%s cannot write type %s", WritePrivilege[i].exe, WritePrivilege[i].target);
@@ -231,7 +230,7 @@ asmlinkage ssize_t hooked_sys_creat(struct pt_regs* regs) {
             continue;
         }
         if (strcmp(current->comm, CreatPrivilege[i].exe) == 0) {
-            type = my_get_type(kbuf);
+            type = getType(kbuf);
             if (type != NULL && strcmp(type, CreatPrivilege[i].target) == 0 && CreatPrivilege[i].value == 0) {
                 printk(KERN_INFO "%s cannot creat type %s\n", CreatPrivilege[i].exe, CreatPrivilege[i].target);
                 // sprintf(msg, "%s cannot creat type %s", CreatPrivilege[i].exe, CreatPrivilege[i].target);
@@ -264,7 +263,7 @@ asmlinkage ssize_t hooked_sys_chmod(struct pt_regs* regs) {
             continue;
         }
         if (strcmp(current->comm, ChmodPrivilege[i].exe) == 0) {
-            type = my_get_type(kbuf);
+            type = getType(kbuf);
             if (type != NULL && strcmp(type, ChmodPrivilege[i].target) == 0 && ChmodPrivilege[i].value == 0) {
                 printk(KERN_INFO "%s cannot chmod %s\n", ChmodPrivilege[i].exe, ChmodPrivilege[i].target);
                 // sprintf(msg, "%s cannot chmod %s", ChmodPrivilege[i].exe, ChmodPrivilege[i].target);
