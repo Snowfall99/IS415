@@ -174,7 +174,7 @@ void add(char* exe_, char* target_, int value_, struct Privilege privileges_[]) 
     }
     // response error msg to user mode
     if (!flag) {
-        strcpy(resp, "there is a duplicated privilege existing");
+        strcpy(resp, "\033[31merror:\033[0m there is a duplicated privilege existing");
         sendMsg(resp, strlen(resp));
         return;
     }
@@ -219,7 +219,7 @@ void update(char* exe_, char* target_, int value_, struct Privilege privileges_[
     }
     // if not found, return error message to user mode
     if (i == MAX_PRIVILEGE_NUM) {
-        strcpy(resp, "privilege not found");
+        strcpy(resp, "\033[31merror:\033[0m privilege not found");
         sendMsg(resp, strlen(resp));
     }
     return;
@@ -258,7 +258,7 @@ void del(char* exe_, char* target_, struct Privilege privileges_[]) {
     }
     // if not found, return error message to user mode
     if (i == MAX_PRIVILEGE_NUM) {
-        strcpy(resp, "privilege not found");
+        strcpy(resp, "\033[031merror:\033[0m privilege not found");
         sendMsg(resp, strlen(resp));
     }
     return;
