@@ -56,6 +56,6 @@ sudo rmmod mycall
     - [x] Evil
     - [x] Listening daemon
 
-**TODO List**
-4. document
-6. list seems not work
+**TODO List**. 
+1. document
+2. list seems not work
