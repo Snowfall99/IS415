@@ -214,10 +214,10 @@ private:
             if (flag.GetLongName() == "exe" || flag.GetLongName() == "type") {
                 continue;
             } else if (flag.GetLongName() == "mkdir" || flag.GetLongName() == "rmdir") {
-                std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", flag.GetLongName(), exe.c_str(), "all", (flag.GetValue()[0] - '0'));
+                std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", flag.GetLongName().c_str(), exe.c_str(), "all", (flag.GetValue()[0] - '0'));
                 my_send_msg(msg);
             } else {
-                std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", flag.GetLongName(), exe.c_str(), type.c_str(), (flag.GetValue()[0] - '0'));
+                std::sprintf(msg, "%-8s %-8s %-8s %-16s %d", "update", flag.GetLongName().c_str(), exe.c_str(), type.c_str(), (flag.GetValue()[0] - '0'));
                 my_send_msg(msg);
             }
         }

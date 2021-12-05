@@ -1,9 +1,15 @@
 #include <iostream>
 #include <vector>
+#include <unistd.h>
 
 #include "command.h"
 
 int main(int argc, char** argv) {
+    int uid = getuid();
+    if (uid != 0) {
+        std::cout << "\033[031merror:\033[0m firmiana should be run as root!" << std::endl << std::endl;
+        return 1;
+    }
     Firmiana firmiana("Firmiana");
     firmiana.Version("0.0.2");
     firmiana.Author("Snowfall99");
