@@ -58,7 +58,7 @@ fn main() {
     match cmd.subcommand_name() {
         Some("READ") => {
             let read = read(); match read {
-                Ok(_) => println!("OK"),
+                Ok(_) => {},
                 Err(e) => eprintln!("{}", e), 
             }
         }
@@ -70,7 +70,7 @@ fn main() {
         }
         Some("OPEN") => {
             let open = open(); match open {
-                Ok(_) => println!("OK"),
+                Ok(_) => {},
                 Err(e) => eprintln!("{}", e),
             }
         }
@@ -107,7 +107,7 @@ fn read() -> std::io::Result<()> {
     let mut file = File::open("test.txt")?;
     let mut content = String::new();
     file.read_to_string(&mut content)?;
-    assert_eq!(content, "hello world\n");
+    print!("{}", content);
     Ok(())
 }
 
@@ -122,7 +122,10 @@ fn write() -> std::io::Result<()> {
 }
 
 fn open() -> std::io::Result<()> {
-    let _file = File::open("test.txt")?;
+    let mut file = File::open("test.txt")?;
+    let mut content = String::new();
+    file.read_to_string(&mut content)?;
+    print!("{}", content);
     Ok(())
 }
 
@@ -132,7 +135,7 @@ fn creat() -> std::io::Result<()> {
 }
 
 fn chmod() -> std::io::Result<()> {
-    fs::set_permissions("test.txt", fs::Permissions::from_mode(0o644)).unwrap();
+    fs::set_permissions("test.txt", fs::Permissions::from_mode(0o644))?;
     Ok(())
 }
 

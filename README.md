@@ -19,25 +19,13 @@ Run the following instruction under the root directory
 make
 ```
 
-**Usage**  
-0. Kernel module:  
+**How to test**   
 ```
-cd kernel
 sudo insmod mycall.ko
+echo "hello world" > ./evil.txt
+./firmiana.sh <subcommand>
 sudo rmmod mycall
 ```  
-1. Firmiana:  
-```
-cd firmiana
-sudo cp firmiana /usr/bin/firmiana
-firmiana help
-firmiana <subcommand> <flags> 
-```
-2. Evil:  
-```
-cd evil
-cargo run <subcommand>
-```
 
 **Roadmap**  
 - CLI

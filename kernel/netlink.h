@@ -15,12 +15,12 @@ extern struct net init_net;
 
 unsigned int msg_array[1024];
 
-void add_privilege(char*, char*, char*, int);
-void update_privilege(char*, char*, char*, int);
-void delete_privilege(char*, char*, char*);
-void list_privilege(void);
+void addPrivilege(char*, char*, char*, int);
+void updatePrivilege(char*, char*, char*, int);
+void deletePrivilege(char*, char*, char*);
+void listPrivilege(void);
 
-int send_msg(char* pbuf, uint16_t len) {
+int sendMsg(char* pbuf, uint16_t len) {
     struct sk_buff *nl_skb;
     struct nlmsghdr *nlh;
     int ret;
@@ -41,7 +41,7 @@ int send_msg(char* pbuf, uint16_t len) {
     return ret;
 }
 
-static void my_rcv_msg(struct sk_buff *skb) {
+static void recvMsg(struct sk_buff *skb) {
     struct nlmsghdr *nlh = NULL;
     char* umsg = NULL;
     int i;
@@ -58,13 +58,14 @@ static void my_rcv_msg(struct sk_buff *skb) {
         umsg = NLMSG_DATA(nlh);
         if (umsg) {
             printk(KERN_INFO "kernel receive from user: %s\n", umsg);
+            // malloc space to hold message from netlink
             command_ = kmalloc(16, GFP_KERNEL);
             exe_ = kmalloc(128, GFP_KERNEL);
             type_ = kmalloc(32, GFP_KERNEL);
             privilege_ = kmalloc(32, GFP_KERNEL);
             len = strlen(umsg);
-
             i = 0;
+            // get command
             while (umsg[i] != ' ' && i < len) {
                 temp_len = strlen(command_);
                 command_[temp_len] = umsg[i];
@@ -74,6 +75,7 @@ static void my_rcv_msg(struct sk_buff *skb) {
             while (umsg[i] == ' ' && i < len) {
                 i ++;
             }
+            // get privilege name
             while (umsg[i] != ' ' && i < len) {
                 temp_len = strlen(privilege_);
                 privilege_[temp_len] = umsg[i];
@@ -83,6 +85,7 @@ static void my_rcv_msg(struct sk_buff *skb) {
             while (umsg[i] == ' ' && i < len) {
                 i ++;
             }
+            // get executable's name
             while (umsg[i] != ' ' && i < len) {
                 temp_len = strlen(exe_);
                 exe_[temp_len] = umsg[i];
@@ -92,6 +95,7 @@ static void my_rcv_msg(struct sk_buff *skb) {
             while (umsg[i] == ' ' && i < len) {
                 i ++;
             }
+            // get type 
             while (umsg[i] != ' ' && i < len) {
                 temp_len = strlen(type_);
                 type_[temp_len] = umsg[i];
@@ -101,573 +105,185 @@ static void my_rcv_msg(struct sk_buff *skb) {
             while (umsg[i] == ' ' && i < len) {
                 i++;
             }
+            // get value
             value_ = (umsg[i] - '0');
             
             printk(KERN_INFO "%s:%s,%s,%s,%d\n", command_, privilege_, exe_, type_, value_);
-
             if (strcmp(command_, "add") == 0) {
-                add_privilege(privilege_, exe_, type_, value_);
+                addPrivilege(privilege_, exe_, type_, value_);
             } else if (strcmp(command_, "update") == 0) {
-                update_privilege(privilege_, exe_, type_, value_);
+                updatePrivilege(privilege_, exe_, type_, value_);
             } else if (strcmp(command_, "delete") == 0) {
-                delete_privilege(privilege_, exe_, type_);
+                deletePrivilege(privilege_, exe_, type_);
             } else if (strcmp(command_, "list") == 0) {
-                list_privilege();
+                listPrivilege();
             }
         }
     }
 }
 
-void list_privilege(void) {
+void list(char* privilegeName_, struct Privilege privileges_[]) {
+    // used for message sending
     char msg[64];
     int i;
 
-    sprintf(msg, "%-16s\n", "write");
-    send_msg(msg, strlen(msg));
     for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (WritePrivilege[i].tombstone) {
-            sprintf(msg, "%-16s %-16s %d", WritePrivilege[i].exe, WritePrivilege[i].target, WritePrivilege[i].value);
-            send_msg(msg, strlen(msg));
-        }
-    }
-    sprintf(msg, "%-16s\n", "read");
-    send_msg(msg, strlen(msg));
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (ReadPrivilege[i].tombstone) {
-            sprintf(msg, "%-16s %-16s %d", ReadPrivilege[i].exe, ReadPrivilege[i].target, ReadPrivilege[i].value);
-            send_msg(msg, strlen(msg));
-        }
-    }
-    sprintf(msg, "%-16s\n", "open");
-    send_msg(msg, strlen(msg));
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (OpenPrivilege[i].tombstone) {
-            sprintf(msg, "%-16s %-16s %d", OpenPrivilege[i].exe, OpenPrivilege[i].target, OpenPrivilege[i].value);
-            send_msg(msg, strlen(msg));
-        }
-    }
-    sprintf(msg, "%-16s\n", "mkdir");
-    send_msg(msg, strlen(msg));
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (MkdirPrivilege[i].tombstone) {
-            sprintf(msg, "%-16s %-16s %d", MkdirPrivilege[i].exe, MkdirPrivilege[i].target, MkdirPrivilege[i].value);
-            send_msg(msg, strlen(msg));
-        }
-    }
-    sprintf(msg, "%-16s\n", "rmdir");
-    send_msg(msg, strlen(msg));
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (RmdirPrivilege[i].tombstone) {
-            sprintf(msg, "%-16s %-16s %d", RmdirPrivilege[i].exe, RmdirPrivilege[i].target, RmdirPrivilege[i].value);
-            send_msg(msg, strlen(msg));
-        }
-    }
-    sprintf(msg, "%-16s\n", "chmod");
-    send_msg(msg, strlen(msg));
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (ChmodPrivilege[i].tombstone) {
-            sprintf(msg, "%-16s %-16s %d", ChmodPrivilege[i].exe, ChmodPrivilege[i].target, ChmodPrivilege[i].value);
-            send_msg(msg, strlen(msg));
-        }
-    }
-    sprintf(msg, "%-16s\n", "creat");
-    send_msg(msg, strlen(msg));
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (CreatPrivilege[i].tombstone) {
-            sprintf(msg, "%-16s %-16s %d", CreatPrivilege[i].exe, CreatPrivilege[i].target, CreatPrivilege[i].value);
-            send_msg(msg, strlen(msg));
+        if (privileges_[i].tombstone) {
+            sprintf(msg, "%-16s %-16s %d", privileges_[i].exe, privileges_[i].target, privileges_[i].value);
+            sendMsg
+        (msg, strlen(msg));
         }
     }
     return;
 }
 
-void add_write(char* exe_, char* target_, int value_) {
+void listPrivilege(void) {
+    list("write", WritePrivilege);
+    list("read", ReadPrivilege);
+    list("open", OpenPrivilege);
+    list("chmod", ChmodPrivilege);
+    list("creat", CreatPrivilege);
+    list("mkdir", MkdirPrivilege);
+    list("rmdir", RmdirPrivilege);
+    return;
+}
+
+void add(char* exe_, char* target_, int value_, struct Privilege privileges_[]) {
     // record the position for insert
     int pos = 0;
-    int i;
+    // whether there is a duplicated privilege or not
     int flag = 1;
+    // reponse error message to user mode 
     char resp[64];
+    int i;
+
     // check whether there is a duplicated privilege or not 
     for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(WritePrivilege[i].exe, exe_) == 0 && strcmp(WritePrivilege[i].target, target_) == 0 && WritePrivilege[i].tombstone) {
+        if (strcmp(privileges_[i].exe, exe_) == 0 && strcmp(privileges_[i].target, target_) == 0 && privileges_[i].tombstone) {
             flag = 0;
             break;
         }
-        if (!WritePrivilege[i].tombstone && pos == 0) {
+        if (!privileges_[i].tombstone && pos == 0) {
             pos = i;
         }
     }
+    // response error msg to user mode
     if (!flag) {
         strcpy(resp, "there is a duplicated privilege existing");
-        send_msg(resp, strlen(resp));
+        sendMsg
+    (resp, strlen(resp));
         return;
     }
     // insert the privilege into list
-    strcpy(WritePrivilege[pos].exe, exe_);
-    strcpy(WritePrivilege[pos].target, target_);
-    WritePrivilege[pos].tombstone = 1;
-    WritePrivilege[pos].value = value_;
+    strcpy(privileges_[pos].exe, exe_);
+    strcpy(privileges_[pos].target, target_);
+    privileges_[pos].tombstone = 1;
+    privileges_[pos].value = value_;
     return;
 }
 
-void add_read(char* exe_, char* target_, int value_) {
-    // record the position for insert
-    int pos = 0;
-    int i;
-    int flag = 1;
-    char resp[64];
-    // check whether there is a duplicated privilege or not 
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(ReadPrivilege[i].exe, exe_) == 0 && strcmp(ReadPrivilege[i].target, target_) == 0 && ReadPrivilege[i].tombstone) {
-            flag = 0;
-            break;
-        }
-        if (!ReadPrivilege[i].tombstone && pos == 0) {
-            pos = i;
-        }
-    }
-    if (!flag) {
-        strcpy(resp, "there is a duplicated privilege existing");
-        send_msg(resp, strlen(resp));
-        return;
-    }
-    // insert the privilege into list
-    strcpy(ReadPrivilege[pos].exe, exe_);
-    strcpy(ReadPrivilege[pos].target, target_);
-    ReadPrivilege[pos].tombstone = 1;
-    ReadPrivilege[pos].value = value_;
-    return;
-}
-
-void add_open(char* exe_, char* target_, int value_) {
-    // record the position for insert
-    int pos = 0;
-    int i;
-    int flag = 1;
-    char resp[64];
-    // check whether there is a duplicated privilege or not 
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(OpenPrivilege[i].exe, exe_) == 0 && strcmp(OpenPrivilege[i].target, target_) == 0 && OpenPrivilege[i].tombstone) {
-            flag = 0;
-            break;
-        }
-        if (!OpenPrivilege[i].tombstone && pos == 0) {
-            pos = i;
-        }
-    }
-    if (!flag) {
-        strcpy(resp, "there is a duplicated privilege existing");
-        send_msg(resp, strlen(resp));
-        return;
-    }
-    // insert the privilege into list
-    strcpy(OpenPrivilege[pos].exe, exe_);
-    strcpy(OpenPrivilege[pos].target, target_);
-    OpenPrivilege[pos].tombstone = 1;
-    OpenPrivilege[pos].value = value_;
-    return;
-}
-
-void add_chmod(char* exe_, char* target_, int value_) {
-    // record the position for insert
-    int pos = 0;
-    int i;
-    int flag = 1;
-    char resp[64];
-    // check whether there is a duplicated privilege or not 
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(ChmodPrivilege[i].exe, exe_) == 0 && strcmp(ChmodPrivilege[i].target, target_) == 0 && ChmodPrivilege[i].tombstone) {
-            flag = 0;
-            break;
-        }
-        if (!ChmodPrivilege[i].tombstone && pos == 0) {
-            pos = i;
-        }
-    }
-    if (!flag) {
-        strcpy(resp, "there is a duplicated privilege existing");
-        send_msg(resp, strlen(resp));
-        return;
-    }
-    // insert the privilege into list
-    strcpy(ChmodPrivilege[pos].exe, exe_);
-    strcpy(ChmodPrivilege[pos].target, target_);
-    ChmodPrivilege[pos].tombstone = 1;
-    ChmodPrivilege[pos].value = value_;
-    return;
-}
-
-void add_creat(char* exe_, char* target_, int value_) {
-    // record the position for insert
-    int pos = 0;
-    int i;
-    int flag = 1;
-    char resp[64];
-    // check whether there is a duplicated privilege or not 
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(CreatPrivilege[i].exe, exe_) == 0 && strcmp(CreatPrivilege[i].target, target_) == 0 && CreatPrivilege[i].tombstone) {
-            flag = 0;
-            break;
-        }
-        if (!CreatPrivilege[i].tombstone && pos == 0) {
-            pos = i;
-        }
-    }
-    if (!flag) {
-        strcpy(resp, "there is a duplicated privilege existing");
-        send_msg(resp, strlen(resp));
-        return;
-    }
-    // insert the privilege into list
-    strcpy(CreatPrivilege[pos].exe, exe_);
-    strcpy(CreatPrivilege[pos].target, target_);
-    CreatPrivilege[pos].tombstone = 1;
-    CreatPrivilege[pos].value = value_;
-    return;
-}
-
-void add_mkdir(char* exe_, char* target_, int value_) {
-    // record the position for insert
-    int pos = 0;
-    int i;
-    int flag = 1;
-    char resp[64];
-    // check whether there is a duplicated privilege or not 
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(MkdirPrivilege[i].exe, exe_) == 0 && strcmp(MkdirPrivilege[i].target, target_) == 0 && MkdirPrivilege[i].tombstone) {
-            flag = 0;
-            break;
-        }
-        if (!MkdirPrivilege[i].tombstone && pos == 0) {
-            pos = i;
-        }
-    }
-    if (!flag) {
-        strcpy(resp, "there is a duplicated privilege existing");
-        send_msg(resp, strlen(resp));
-        return;
-    }
-    // insert the privilege into list
-    strcpy(MkdirPrivilege[pos].exe, exe_);
-    strcpy(MkdirPrivilege[pos].target, target_);
-    MkdirPrivilege[pos].tombstone = 1;
-    MkdirPrivilege[pos].value = value_;
-    return;
-}
-
-void add_rmdir(char* exe_, char* target_, int value_) {
-    // record the position for insert
-    int pos = 0;
-    int i;
-    int flag = 1;
-    char resp[64];
-    // check whether there is a duplicated privilege or not 
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(RmdirPrivilege[i].exe, exe_) == 0 && strcmp(RmdirPrivilege[i].target, target_) == 0 && RmdirPrivilege[i].tombstone) {
-            flag = 0;
-            break;
-        }
-        if (!RmdirPrivilege[i].tombstone && pos == 0) {
-            pos = i;
-        }
-    }
-    if (!flag) {
-        strcpy(resp, "there is a duplicated privilege existing");
-        send_msg(resp, strlen(resp));
-        return;
-    }
-    // insert the privilege into list
-    strcpy(RmdirPrivilege[pos].exe, exe_);
-    strcpy(RmdirPrivilege[pos].target, target_);
-    RmdirPrivilege[pos].tombstone = 1;
-    RmdirPrivilege[pos].value = value_;
-    return;
-}
-
-
-void add_privilege(char* privilege_, char* exe_, char* target_, int value_) {
+void addPrivilege(char* privilege_, char* exe_, char* target_, int value_) {
     if (strcmp(privilege_, "write") == 0) {
-        add_write(exe_, target_, value_);
+        add(exe_, target_, value_, WritePrivilege);
     } else if (strcmp(privilege_, "read") == 0) {
-        add_read(exe_, target_, value_);
+        add(exe_, target_, value_, ReadPrivilege);
     } else if (strcmp(privilege_, "open") == 0) {
-        add_open(exe_, target_, value_);
+        add(exe_, target_, value_, OpenPrivilege);
     } else if (strcmp(privilege_, "creat") == 0) {
-        add_creat(exe_, target_, value_);
+        add(exe_, target_, value_, CreatPrivilege);
     } else if (strcmp(privilege_, "chmod") == 0) {
-        add_chmod(exe_, target_, value_);
+        add(exe_, target_, value_, ChmodPrivilege);
     } else if (strcmp(privilege_, "mkdir") == 0) {
-        add_mkdir(exe_, target_, value_);
+        add(exe_, target_, value_, MkdirPrivilege);
     } else if (strcmp(privilege_, "rmdir") == 0) {
-        add_rmdir(exe_, target_, value_);
+        add(exe_, target_, value_, RmdirPrivilege);
     }
     return;
 }
 
-void update_write(char* exe_, char* target_, int value_) {
-    int i;
+void update(char* exe_, char* target_, int value_, struct Privilege privileges_[]) {
+    // response error message to user mode
     char resp[128];
+    int i;
+
+    // look for the privilege and update
     for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(WritePrivilege[i].exe, exe_) == 0 && strcmp(WritePrivilege[i].target, target_) == 0 && WritePrivilege[i].tombstone) {
-            WritePrivilege[i].value = value_;
+        if (strcmp(privileges_[i].exe, exe_) == 0 && strcmp(privileges_[i].target, target_) == 0 && privileges_[i].tombstone) {
+            privileges_[i].value = value_;
             break;
         }
     }
+    // if not found, return error message to user mode
     if (i == MAX_PRIVILEGE_NUM) {
         strcpy(resp, "privilege not found");
-        send_msg(resp, strlen(resp));
+        sendMsg
+    (resp, strlen(resp));
     }
     return;
 }
 
-void update_read(char* exe_, char* target_, int value_) {
-    int i;
-    char resp[128];
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(ReadPrivilege[i].exe, exe_) == 0 && strcmp(ReadPrivilege[i].target, target_) == 0 && ReadPrivilege[i].tombstone) {
-            ReadPrivilege[i].value = value_;
-            break;
-        }
-    }
-    if (i == MAX_PRIVILEGE_NUM) {
-        strcpy(resp, "privilege not found");
-        send_msg(resp, strlen(resp));
-    }
-    return;
-}
-
-void update_open(char* exe_, char* target_, int value_) {
-    int i;
-    char resp[128];
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(OpenPrivilege[i].exe, exe_) == 0 && strcmp(OpenPrivilege[i].target, target_) == 0 && OpenPrivilege[i].tombstone) {
-            OpenPrivilege[i].value = value_;
-            break;
-        }
-    }
-    if (i == MAX_PRIVILEGE_NUM) {
-        strcpy(resp, "privilege not found");
-        send_msg(resp, strlen(resp));
-    }
-    return;
-}
-
-void update_chmod(char* exe_, char* target_, int value_) {
-    int i;
-    char resp[128];
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(ChmodPrivilege[i].exe, exe_) == 0 && strcmp(ChmodPrivilege[i].target, target_) == 0 && ChmodPrivilege[i].tombstone) {
-            ChmodPrivilege[i].value = value_;
-            break;
-        }
-    }
-    if (i == MAX_PRIVILEGE_NUM) {
-        strcpy(resp, "privilege not found");
-        send_msg(resp, strlen(resp));
-    }
-    return;
-}
-
-void update_creat(char* exe_, char* target_, int value_) {
-    int i;
-    char resp[128];
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(CreatPrivilege[i].exe, exe_) == 0 && strcmp(CreatPrivilege[i].target, target_) == 0 && CreatPrivilege[i].tombstone) {
-            CreatPrivilege[i].value = value_;
-            break;
-        }
-    }
-    if (i == MAX_PRIVILEGE_NUM) {
-        strcpy(resp, "privilege not found");
-        send_msg(resp, strlen(resp));
-    }
-    return;
-}
-
-void update_mkdir(char* exe_, char* target_, int value_) {
-    int i;
-    char resp[128];
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(MkdirPrivilege[i].exe, exe_) == 0 && strcmp(MkdirPrivilege[i].target, target_) == 0 && MkdirPrivilege[i].tombstone) {
-            MkdirPrivilege[i].value = value_;
-            break;
-        }
-    }
-    if (i == MAX_PRIVILEGE_NUM) {
-        strcpy(resp, "privilege not found");
-        send_msg(resp, strlen(resp));
-    }
-    return;
-}
-
-void update_rmdir(char* exe_, char* target_, int value_) {
-    int i;
-    char resp[128];
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(RmdirPrivilege[i].exe, exe_) == 0 && strcmp(RmdirPrivilege[i].target, target_) == 0 && RmdirPrivilege[i].tombstone) {
-            RmdirPrivilege[i].value = value_;
-            break;
-        }
-    }
-    if (i == MAX_PRIVILEGE_NUM) {
-        strcpy(resp, "privilege not found");
-        send_msg(resp, strlen(resp));
-    }
-    return;
-}
-
-void update_privilege(char* privilege_, char* exe_, char* target_, int value_) {
+void updatePrivilege(char* privilege_, char* exe_, char* target_, int value_) {
     if (strcmp(privilege_, "write") == 0) {
-        update_write(exe_, target_, value_);
+        update(exe_, target_, value_, WritePrivilege);
     } else if (strcmp(privilege_, "read") == 0) {
-        update_read(exe_, target_, value_);
+        update(exe_, target_, value_, ReadPrivilege);
     } else if (strcmp(privilege_, "open") == 0) {
-        update_open(exe_, target_, value_);
+        update(exe_, target_, value_, OpenPrivilege);
     } else if (strcmp(privilege_, "creat") == 0) {
-        update_creat(exe_, target_, value_);
+        update(exe_, target_, value_, CreatPrivilege);
     } else if (strcmp(privilege_, "chmod") == 0) {
-        update_chmod(exe_, target_, value_);
+        update(exe_, target_, value_, ChmodPrivilege);
     } else if (strcmp(privilege_, "mkdir") == 0) {
-        update_mkdir(exe_, target_, value_);
+        update(exe_, target_, value_, MkdirPrivilege);
     } else if (strcmp(privilege_, "rmdir") == 0) {
-        update_rmdir(exe_, target_, value_);
+        update(exe_, target_, value_, RmdirPrivilege);
     }
     return;
 }
 
-void delete_write(char* exe_, char* target_) {
-    int i;
+void del(char* exe_, char* target_, struct Privilege privileges_[]) {
+    // response error message to user mode
     char resp[128];
+    int i;
+
+    // look for privilege and change its tombstone to 0
     for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(WritePrivilege[i].exe, exe_) == 0 && strcmp(WritePrivilege[i].target, target_) == 0 && WritePrivilege[i].tombstone) {
-            WritePrivilege[i].tombstone = 0;
+        if (strcmp(privileges_[i].exe, exe_) == 0 && strcmp(privileges_[i].target, target_) == 0 && privileges_[i].tombstone) {
+            privileges_[i].tombstone = 0;
             break;
         }
     }
+    // if not found, return error message to user mode
     if (i == MAX_PRIVILEGE_NUM) {
         strcpy(resp, "privilege not found");
-        send_msg(resp, strlen(resp));
+        sendMsg
+    (resp, strlen(resp));
     }
     return;
 }
 
-void delete_read(char* exe_, char* target_) {
-    int i;
-    char resp[128];
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(ReadPrivilege[i].exe, exe_) == 0 && strcmp(ReadPrivilege[i].target, target_) == 0 && ReadPrivilege[i].tombstone) {
-            ReadPrivilege[i].tombstone = 0;
-            break;
-        }
-    }
-    if (i == MAX_PRIVILEGE_NUM) {
-        strcpy(resp, "privilege not found");
-        send_msg(resp, strlen(resp));
-    }
-    return;
-}
-
-void delete_open(char* exe_, char* target_) {
-    int i;
-    char resp[128];
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(OpenPrivilege[i].exe, exe_) == 0 && strcmp(OpenPrivilege[i].target, target_) == 0 && OpenPrivilege[i].tombstone) {
-            OpenPrivilege[i].tombstone = 0;
-            break;
-        }
-    }
-    if (i == MAX_PRIVILEGE_NUM) {
-        strcpy(resp, "privilege not found");
-        send_msg(resp, strlen(resp));
-    }
-    return;
-}
-
-void delete_creat(char* exe_, char* target_) {
-    int i;
-    char resp[128];
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(CreatPrivilege[i].exe, exe_) == 0 && strcmp(CreatPrivilege[i].target, target_) == 0 && CreatPrivilege[i].tombstone) {
-            CreatPrivilege[i].tombstone = 0;
-            break;
-        }
-    }
-    if (i == MAX_PRIVILEGE_NUM) {
-        strcpy(resp, "privilege not found");
-        send_msg(resp, strlen(resp));
-    }
-    return;
-}
-
-void delete_chmod(char* exe_, char* target_) {
-    int i;
-    char resp[128];
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(ChmodPrivilege[i].exe, exe_) == 0 && strcmp(ChmodPrivilege[i].target, target_) == 0 && ChmodPrivilege[i].tombstone) {
-            ChmodPrivilege[i].tombstone = 0;
-            break;
-        }
-    }
-    if (i == MAX_PRIVILEGE_NUM) {
-        strcpy(resp, "privilege not found");
-        send_msg(resp, strlen(resp));
-    }
-    return;
-}
-
-void delete_mkdir(char* exe_, char* target_) {
-    int i;
-    char resp[128];
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(MkdirPrivilege[i].exe, exe_) == 0 && strcmp(MkdirPrivilege[i].target, target_) == 0 && MkdirPrivilege[i].tombstone) {
-            MkdirPrivilege[i].tombstone = 0;
-            break;
-        }
-    }
-    if (i == MAX_PRIVILEGE_NUM) {
-        strcpy(resp, "privilege not found");
-        send_msg(resp, strlen(resp));
-    }
-    return;
-}
-
-void delete_rmdir(char* exe_, char* target_) {
-    int i;
-    char resp[128];
-    for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(RmdirPrivilege[i].exe, exe_) == 0 && strcmp(RmdirPrivilege[i].target, target_) == 0 && RmdirPrivilege[i].tombstone) {
-            RmdirPrivilege[i].tombstone = 0;
-            break;
-        }
-    }
-    if (i == MAX_PRIVILEGE_NUM) {
-        strcpy(resp, "privilege not found");
-        send_msg(resp, strlen(resp));
-    }
-    return;
-}
-
-void delete_privilege(char* privilege_, char* exe_, char* target_) {
+void deletePrivilege(char* privilege_, char* exe_, char* target_) {
     if (strcmp(privilege_, "write") == 0) {
-        delete_write(exe_, target_);
+        del(exe_, target_, WritePrivilege);
     } else if (strcmp(privilege_, "read") == 0) {
-        delete_read(exe_, target_);
+        del(exe_, target_, ReadPrivilege);
     } else if (strcmp(privilege_, "open") == 0) {
-        delete_open(exe_, target_);
+        del(exe_, target_, OpenPrivilege);
     } else if (strcmp(privilege_, "creat") == 0) {
-        delete_creat(exe_, target_);
+        del(exe_, target_, CreatPrivilege);
     } else if (strcmp(privilege_, "chmod") == 0) {
-        delete_chmod(exe_, target_);
+        del(exe_, target_, ChmodPrivilege);
     } else if (strcmp(privilege_, "mkdir") == 0) {
-        delete_mkdir(exe_, target_);
+        del(exe_, target_, MkdirPrivilege);
     } else if (strcmp(privilege_, "rmdir") == 0) {
-        delete_rmdir(exe_, target_);
+        del(exe_, target_, RmdirPrivilege);
     }
     return;
 }
 
 struct netlink_kernel_cfg cfg = {
-    .input = my_rcv_msg,
+    // hook recvMsg for receiving msg from netlink
+    .input = recvMsg,
 };
 
 int init_netlink(void) {
@@ -678,7 +294,6 @@ int init_netlink(void) {
         printk(KERN_INFO "netlink kernel create error\n");
         return -1;
     }
-
     for (i = 0; i < 1024; i++) {
         msg_array[i] = 0;
     }
