@@ -1,5 +1,5 @@
 **Firmiana**  
-IS415 Group 8 Project, Fall 2021    
+IS415 Group 2-1 Project, Fall 2021    
 A CLI program for managing program's privileges based on system call overloading.
 
 **Memebers**  
@@ -21,9 +21,11 @@ make
 
 **How to test**   
 ```
-sudo insmod mycall.ko
-echo "hello world" > ./evil/test.txt
+sudo insmod ./kernel/mycall.ko
+./user/listen &
+sudo firmia help
 ./firmiana.sh <subcommand>
+sudo firmiana LIST
 sudo rmmod mycall
 ```  
 
@@ -34,23 +36,14 @@ sudo rmmod mycall
 - Netlink  
     - [x] netlink  
 
-- System call
-    - File 
-        - [x] creat  
-        - [x] chmod  
-        - [x] mkdir  
-        - [x] rmdir
-
-    - NetWork  
-        - [ ] TBD(czx): have not decided yet
-    
-    - I/O
-        - [x] write  
-        - [x] read  
-        - [x] openat 
-    
-    - Root system call   
-        - [ ] reboot
+- System call 
+    - [x] creat  
+    - [x] chmod  
+    - [x] mkdir  
+    - [x] rmdir
+    - [x] write  
+    - [x] read  
+    - [x] openat 
 
 - Test  
     - [x] Evil
