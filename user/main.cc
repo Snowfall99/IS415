@@ -5,16 +5,21 @@
 #include "command.h"
 
 int main(int argc, char** argv) {
+    // check uid, for only root has the privilege to run firmiana
     int uid = getuid();
     if (uid != 0) {
         std::cout << "\033[031merror:\033[0m firmiana should be run as root!" << std::endl << std::endl;
         return 1;
     }
+    // set basic information
     Firmiana firmiana("Firmiana");
-    firmiana.Version("0.0.2");
+    firmiana.Version("0.1.0");
     firmiana.Author("Snowfall99");
-    firmiana.Description("IS415 Group 8 Project: Firmiana");
+    firmiana.Description("\t\033[35mProject for IS415 group 2-1\033[0m\n \
+\t\033[33mLinux Kernel Version:\033[0m 5.4.0-73-generic\n \
+\t\033[33mPlatform\033[0m: x86_64, Aliyun");
 
+    // set flags
     Flag exeFlag("exe");
     exeFlag.SetLongName("exe");
     exeFlag.SetShortName("e");
@@ -62,6 +67,7 @@ int main(int argc, char** argv) {
     creatFlag.SetShortName("c");
     creatFlag.SetDescription("creat privilege, default 0");
 
+    // set subcommands
     std::vector<Subcommand> subcommands;
     Subcommand addCmd("ADD");
     addCmd.SetDescription("add privilege");
@@ -106,12 +112,18 @@ int main(int argc, char** argv) {
     listCmd.SetDescription("list all privileges");
     subcommands.push_back(listCmd);
 
+    Subcommand infoCmd("INFO");
+    infoCmd.SetDescription("show firmiana info");
+    subcommands.push_back(infoCmd);
+
     firmiana.AddSubcommands(subcommands);
 
+    // print information, if no subcommand is provided
     if (argc == 1) {
         firmiana.Information();
         return 0;
     }
+    // check validity of subcommand
     std::string subcommand(argv[1]);
     if (!firmiana.Valid(subcommand)) {
         firmiana.Error(subcommand);
@@ -121,6 +133,7 @@ int main(int argc, char** argv) {
         firmiana.Information();
         return 0;
     }
+    // get flags
     Subcommand model = firmiana.FindSubcommand(subcommand);
     Subcommand sc(model.GetName());
     sc.SetDescription(model.GetDescription());

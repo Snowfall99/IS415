@@ -1,3 +1,9 @@
+/*
+ * netlink module in user mode
+ */
+#ifndef __USER_NETLINK_H__
+#define __USER_NETLINK_H__
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,7 +11,6 @@
 #include <stdint.h>
 #include <linux/netlink.h>
 #include <sys/socket.h>
-
 
 #define NETLINK_TEST 30
 #define MSG_LEN 1024
@@ -112,3 +117,5 @@ int my_recv_msg(char* umsg_) {
     free((void *)nlh);
     return 0;
 }
+
+#endif // __USER_NETLINK_H__

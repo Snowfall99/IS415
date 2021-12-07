@@ -1,3 +1,7 @@
+/*
+ * creat is used for test creat privilege
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>

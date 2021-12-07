@@ -1,3 +1,9 @@
+/*
+ * privilege.h declares arrays of privilege struct
+ */
+#ifndef __KERNEL_PRIVILEGE_H__
+#define __KERNEL_PRIVILEGE_H__
+
 #include <linux/string.h>
 #include <linux/slab.h>
 #include <linux/kernel.h>
@@ -18,3 +24,5 @@ static struct Privilege RmdirPrivilege[MAX_PRIVILEGE_NUM];
 static struct Privilege MkdirPrivilege[MAX_PRIVILEGE_NUM];
 static struct Privilege ChmodPrivilege[MAX_PRIVILEGE_NUM];
 static struct Privilege CreatPrivilege[MAX_PRIVILEGE_NUM];
+
+#endif // __KERNEL_PRIVILEGE_H__

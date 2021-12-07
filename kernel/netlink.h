@@ -1,3 +1,9 @@
+/*
+ * netlink module in kernel mode
+ */
+#ifndef __KERNEL_NETLINK_H__
+#define __KERNEL_NETLINK_H__
+
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -21,7 +27,7 @@ void updatePrivilege(char*, char*, char*, int);
 void deletePrivilege(char*, char*, char*);
 void listPrivilege(void);
 
-int sendMsg(char* pbuf, uint16_t len) {
+int send_msg(char* pbuf, uint16_t len) {
     struct sk_buff *nl_skb;
     struct nlmsghdr *nlh;
     int ret;
@@ -42,7 +48,7 @@ int sendMsg(char* pbuf, uint16_t len) {
     return ret;
 }
 
-static void recvMsg(struct sk_buff *skb) {
+static void recv_msg(struct sk_buff *skb) {
     struct nlmsghdr *nlh = NULL;
     char* umsg = NULL;
     int i;
@@ -128,13 +134,16 @@ void list(char* privilegeName_, struct Privilege privileges_[]) {
     char msg[64];
     int i;
     
-    sprintf(msg, "\033[033m%s\033[0m", privilegeName_);
-    sendMsg(msg, strlen(msg));
+    sprintf(msg, "\n\033[035m%s\033[0m\n", privilegeName_);
+    send_msg(msg, strlen(msg));
+    mdelay(10);
+    sprintf(msg, "\033[033m%-16s %-16s %s\033[0m", "<executable>", "<target>", "<val>");
+    send_msg(msg, strlen(msg));
     mdelay(10);
     for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
         if (privileges_[i].tombstone) {
             sprintf(msg, "\033[32m%-16s\033[0m \033[34m%-16s\033[0m %d", privileges_[i].exe, privileges_[i].target, privileges_[i].value);
-            sendMsg(msg, strlen(msg));
+            send_msg(msg, strlen(msg));
             mdelay(10);
         }
     }
@@ -174,7 +183,7 @@ void add(char* exe_, char* target_, int value_, struct Privilege privileges_[]) 
     // response error msg to user mode
     if (!flag) {
         strcpy(resp, "\033[31merror:\033[0m there is a duplicated privilege existing");
-        sendMsg(resp, strlen(resp));
+        send_msg(resp, strlen(resp));
         return;
     }
     // insert the privilege into list
@@ -219,7 +228,7 @@ void update(char* exe_, char* target_, int value_, struct Privilege privileges_[
     // if not found, return error message to user mode
     if (i == MAX_PRIVILEGE_NUM) {
         strcpy(resp, "\033[31merror:\033[0m privilege not found");
-        sendMsg(resp, strlen(resp));
+        send_msg(resp, strlen(resp));
     }
     return;
 }
@@ -258,7 +267,7 @@ void del(char* exe_, char* target_, struct Privilege privileges_[]) {
     // if not found, return error message to user mode
     if (i == MAX_PRIVILEGE_NUM) {
         strcpy(resp, "\033[031merror:\033[0m privilege not found");
-        sendMsg(resp, strlen(resp));
+        send_msg(resp, strlen(resp));
     }
     return;
 }
@@ -283,8 +292,8 @@ void deletePrivilege(char* privilege_, char* exe_, char* target_) {
 }
 
 struct netlink_kernel_cfg cfg = {
-    // hook recvMsg for receiving msg from netlink
-    .input = recvMsg,
+    // hook recv_msg for receiving msg from netlink
+    .input = recv_msg,
 };
 
 int init_netlink(void) {
@@ -309,3 +318,5 @@ void remove_netlink(void) {
     }
     printk(KERN_INFO "netlink release\n");
 }
+
+#endif // __KERNEL_NETLINK_H__

@@ -8,4 +8,4 @@ creat:
 	gcc creat.c -o creat
 
 clean:
-	rm evil creat
+	rm evil creat new.txt
