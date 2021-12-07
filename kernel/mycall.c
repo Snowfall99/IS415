@@ -27,12 +27,14 @@ unsigned long *get_syscall_table(void) {
     return (unsigned long *)base;
 }
 
+// turn on write protection bit of syscall table
 void turn_on_wr_protect(unsigned long *table) {
     unsigned int level;
     pte_t *pte = lookup_address((long unsigned int)table, &level);
     pte->pte &= ~_PAGE_RW;
 }
 
+// turn off write protection bit of syscall table
 void turn_off_wr_protect(unsigned long *table) {
     unsigned int level;
     pte_t *pte = lookup_address((long unsigned int)table, &level);
@@ -60,7 +62,7 @@ asmlinkage ssize_t hooked_sys_read(struct pt_regs* regs) {
     struct file *myfile;
     char filename[100] = {'\0'};
     char* type = "";
-    char msg[64];
+    // char msg[64];
 
     ret_val = original_read(regs);
     for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
@@ -93,7 +95,7 @@ asmlinkage ssize_t hooked_sys_write(struct pt_regs* regs) {
     struct file *myfile;
     char filename[100] = {'\0'};
     char* type = "";
-    char msg[64];
+    // char msg[64];
 
     for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
         if (!WritePrivilege[i].tombstone) {
@@ -122,7 +124,7 @@ asmlinkage ssize_t hooked_sys_openat(struct pt_regs* regs) {
     char* kbuf;
     long error;
     int i;
-    char msg[64];
+    // char msg[64];
 
     kbuf = kmalloc(NAME_MAX, GFP_KERNEL);
     if (kbuf == NULL) {
@@ -153,7 +155,7 @@ asmlinkage ssize_t hooked_sys_mkdir(struct pt_regs* regs) {
     char* kbuf;
     long error;
     int i;
-    char msg[64];
+    // char msg[64];
 
     kbuf = kmalloc(NAME_MAX, GFP_KERNEL);
     if (kbuf == NULL) {
@@ -184,7 +186,7 @@ asmlinkage ssize_t hooked_sys_rmdir(struct pt_regs* regs) {
     char* kbuf;
     long error;
     int i;
-    char msg[64];
+    // char msg[64];
 
     kbuf = kmalloc(NAME_MAX, GFP_KERNEL);
     if (kbuf == NULL) {
@@ -216,7 +218,7 @@ asmlinkage ssize_t hooked_sys_creat(struct pt_regs* regs) {
     long error;
     int i;
     char* type = "";
-    char msg[64];
+    // char msg[64];
 
     kbuf = kmalloc(NAME_MAX, GFP_KERNEL);
     if (kbuf == NULL) {
@@ -249,7 +251,7 @@ asmlinkage ssize_t hooked_sys_chmod(struct pt_regs* regs) {
     long error;
     int i;
     char* type = "";
-    char msg[64];
+    // char msg[64];
 
     kbuf = kmalloc(NAME_MAX, GFP_KERNEL);
     if (kbuf == NULL) {
