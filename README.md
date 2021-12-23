@@ -12,6 +12,7 @@ A CLI program for managing program's privileges based on system call overloading
 /kernel: kernel module  
 /user: user mode CLI program to manage privileges  
 /evil: test program written in Rust  
+firmiana.sh: a simple shell script for presentation  
 
 **Build**  
 Run the following instruction under the root directory
