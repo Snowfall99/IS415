@@ -1,5 +1,5 @@
 /*
- * netlink module in kernel mode
+ * Netlink module in kernel mode.
  */
 #ifndef __KERNEL_NETLINK_H__
 #define __KERNEL_NETLINK_H__
@@ -65,14 +65,14 @@ static void recv_msg(struct sk_buff *skb) {
         umsg = NLMSG_DATA(nlh);
         if (umsg) {
             printk(KERN_INFO "kernel receive from user: %s\n", umsg);
-            // malloc space to hold message from netlink
+            // Malloc space to hold message from netlink.
             command_ = kmalloc(16, GFP_KERNEL);
             exe_ = kmalloc(128, GFP_KERNEL);
             type_ = kmalloc(32, GFP_KERNEL);
             privilege_ = kmalloc(32, GFP_KERNEL);
             len = strlen(umsg);
             i = 0;
-            // get command
+            // Get command.
             while (umsg[i] != ' ' && i < len) {
                 temp_len = strlen(command_);
                 command_[temp_len] = umsg[i];
@@ -82,7 +82,7 @@ static void recv_msg(struct sk_buff *skb) {
             while (umsg[i] == ' ' && i < len) {
                 i ++;
             }
-            // get privilege name
+            // Get privilege name.
             while (umsg[i] != ' ' && i < len) {
                 temp_len = strlen(privilege_);
                 privilege_[temp_len] = umsg[i];
@@ -92,7 +92,7 @@ static void recv_msg(struct sk_buff *skb) {
             while (umsg[i] == ' ' && i < len) {
                 i ++;
             }
-            // get executable's name
+            // Get executable's name.
             while (umsg[i] != ' ' && i < len) {
                 temp_len = strlen(exe_);
                 exe_[temp_len] = umsg[i];
@@ -102,7 +102,7 @@ static void recv_msg(struct sk_buff *skb) {
             while (umsg[i] == ' ' && i < len) {
                 i ++;
             }
-            // get type 
+            // Get type. 
             while (umsg[i] != ' ' && i < len) {
                 temp_len = strlen(type_);
                 type_[temp_len] = umsg[i];
@@ -112,7 +112,7 @@ static void recv_msg(struct sk_buff *skb) {
             while (umsg[i] == ' ' && i < len) {
                 i++;
             }
-            // get value
+            // Get value.
             value_ = (umsg[i] - '0');
             
             printk(KERN_INFO "%s:%s,%s,%s,%d\n", command_, privilege_, exe_, type_, value_);
@@ -131,7 +131,7 @@ static void recv_msg(struct sk_buff *skb) {
 }
 
 void list(char* privilegeName_, struct Privilege privileges_[]) {
-    // used for message sending
+    // Used for message sending.
     char msg[64];
     int i;
     
@@ -143,7 +143,9 @@ void list(char* privilegeName_, struct Privilege privileges_[]) {
     mdelay(10);
     for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
         if (privileges_[i].tombstone) {
-            sprintf(msg, "\033[32m%-16s\033[0m \033[34m%-16s\033[0m %d", privileges_[i].exe, privileges_[i].target, privileges_[i].value);
+            sprintf(msg, "\033[32m%-16s\033[0m \033[34m%-16s\033[0m %d", 
+                privileges_[i].exe, privileges_[i].target, 
+                privileges_[i].value);
             send_msg(msg, strlen(msg));
             mdelay(10);
         }
@@ -163,17 +165,19 @@ void listPrivilege(void) {
 }
 
 void add(char* exe_, char* target_, int value_, struct Privilege privileges_[]) {
-    // record the position for insert
+    // Record the position for insert.
     int pos = 0;
-    // whether there is a duplicated privilege or not
+    // Whether there is a duplicated privilege or not.
     int flag = 1;
-    // reponse error message to user mode 
+    // Reponse error message to user mode.
     char resp[64];
     int i;
 
-    // check whether there is a duplicated privilege or not 
+    // Check whether there is a duplicated privilege or not.
     for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(privileges_[i].exe, exe_) == 0 && strcmp(privileges_[i].target, target_) == 0 && privileges_[i].tombstone) {
+        if (strcmp(privileges_[i].exe, exe_) == 0 && 
+            strcmp(privileges_[i].target, target_) == 0 && 
+            privileges_[i].tombstone) {
             flag = 0;
             break;
         }
@@ -219,14 +223,16 @@ void update(char* exe_, char* target_, int value_, struct Privilege privileges_[
     char resp[128];
     int i;
 
-    // look for the privilege and update
+    // Look for the privilege and update.
     for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(privileges_[i].exe, exe_) == 0 && strcmp(privileges_[i].target, target_) == 0 && privileges_[i].tombstone) {
+        if (strcmp(privileges_[i].exe, exe_) == 0 && 
+            strcmp(privileges_[i].target, target_) == 0 && 
+            privileges_[i].tombstone) {
             privileges_[i].value = value_;
             break;
         }
     }
-    // if not found, return error message to user mode
+    // If not found, return error message to user mode.
     if (i == MAX_PRIVILEGE_NUM) {
         strcpy(resp, "\033[31merror:\033[0m privilege not found");
         send_msg(resp, strlen(resp));
@@ -254,18 +260,20 @@ void updatePrivilege(char* privilege_, char* exe_, char* target_, int value_) {
 }
 
 void del(char* exe_, char* target_, struct Privilege privileges_[]) {
-    // response error message to user mode
+    // Response error message to user mode.
     char resp[128];
     int i;
 
-    // look for privilege and change its tombstone to 0
+    // Look for privilege and change its tombstone to 0.
     for (i = 0; i < MAX_PRIVILEGE_NUM; i++) {
-        if (strcmp(privileges_[i].exe, exe_) == 0 && strcmp(privileges_[i].target, target_) == 0 && privileges_[i].tombstone) {
+        if (strcmp(privileges_[i].exe, exe_) == 0 && 
+            strcmp(privileges_[i].target, target_) == 0 && 
+            privileges_[i].tombstone) {
             privileges_[i].tombstone = 0;
             break;
         }
     }
-    // if not found, return error message to user mode
+    // If not found, return error message to user mode.
     if (i == MAX_PRIVILEGE_NUM) {
         strcpy(resp, "\033[031merror:\033[0m privilege not found");
         send_msg(resp, strlen(resp));
@@ -293,7 +301,7 @@ void deletePrivilege(char* privilege_, char* exe_, char* target_) {
 }
 
 struct netlink_kernel_cfg cfg = {
-    // hook recv_msg for receiving msg from netlink
+    // Hook recv_msg for receiving msg from netlink.
     .input = recv_msg,
 };
 

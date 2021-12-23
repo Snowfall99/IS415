@@ -1,5 +1,5 @@
 /*
- * netlink module in user mode
+ * Netlink module in user mode.
  */
 #ifndef __USER_NETLINK_H__
 #define __USER_NETLINK_H__

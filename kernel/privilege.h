@@ -1,5 +1,5 @@
 /*
- * privilege.h declares arrays of privilege struct
+ * `privilege.h` declares arrays of privilege struct.
  */
 #ifndef __KERNEL_PRIVILEGE_H__
 #define __KERNEL_PRIVILEGE_H__

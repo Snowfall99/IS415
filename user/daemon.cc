@@ -1,6 +1,6 @@
 /*
- * listen daemon receives message sent from kernel through netlink and 
- * display them to user through stdout 
+ * Listen daemon receives message sent from kernel through netlink and 
+ * display them to user through stdout.
  */
 
 #include <iostream>

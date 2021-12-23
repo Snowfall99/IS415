@@ -1,3 +1,8 @@
+/*
+ * `main.c` is the entry of Firmiana. In consideration of safety, can only be
+ * executed in root mode.
+ */
+
 #include <iostream>
 #include <vector>
 #include <unistd.h>
@@ -8,7 +13,8 @@ int main(int argc, char** argv) {
     // check uid, for only root has the privilege to run firmiana
     int uid = getuid();
     if (uid != 0) {
-        std::cout << "\033[031merror:\033[0m firmiana should be run as root!" << std::endl << std::endl;
+        std::cout << "\033[031merror:\033[0m firmiana should be run as root!" \
+        << std::endl << std::endl;
         return 1;
     }
     // set basic information
@@ -118,12 +124,12 @@ int main(int argc, char** argv) {
 
     firmiana.AddSubcommands(subcommands);
 
-    // print information, if no subcommand is provided
+    // Print help information, if no subcommand is provided.
     if (argc == 1) {
         firmiana.Information();
         return 0;
     }
-    // check validity of subcommand
+    // Check validity of subcommand.
     std::string subcommand(argv[1]);
     if (!firmiana.Valid(subcommand)) {
         firmiana.Error(subcommand);
@@ -133,7 +139,7 @@ int main(int argc, char** argv) {
         firmiana.Information();
         return 0;
     }
-    // get flags
+    // Parse flags.
     Subcommand model = firmiana.FindSubcommand(subcommand);
     Subcommand sc(model.GetName());
     sc.SetDescription(model.GetDescription());

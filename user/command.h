@@ -1,5 +1,5 @@
 /*
- * command.h is a self-made cli library for parsing commandline parameters
+ * `command.h` is a self-made cli library for parsing commandline parameters.
  */
 
 #ifndef __USER_COMMAND_H__
@@ -14,19 +14,19 @@
 
 class Flag {
 private:
-    // name of flag
+    // Name of flag.
     std::string key;
-    // value of flag
+    // Value of flag.
     std::string value;
-    // short name of flag, e.g. '-t'
+    // Short name of flag, e.g. '-t'.
     std::string shortName;
-    // long name of flag, e.g. '--type'
+    // Long name of flag, e.g. '--type'.
     std::string longName;
-    // description of flag
+    // Description of flag.
     std::string description;
-    // whether this flag is required or not
+    // Whether this flag is required or not.
     bool isRequired;
-    // whether this flag need a value
+    // Whether this flag need a value.
     bool needValue;
 
 public:
@@ -103,11 +103,11 @@ public:
 
 class Subcommand {
 private:
-    // name of subcommand
+    // Name of subcommand.
     std::string name;
-    // description of subcommand
+    // Description of subcommand.
     std::string description;
-    // vector for flags related to subcommmnd
+    // Vector for flags related to subcommmnd.
     std::vector<Flag> flags;
 
 public:
@@ -143,7 +143,7 @@ public:
         return flags;
     }
 
-    // use longname to judge whether subcommand contains this flag or not
+    // Use longname to judge whether subcommand contains this flag or not.
     bool ValidLongName(std::string flag_) {
         for (auto flag : flags) {
             if (flag.GetLongName() == flag_) {
@@ -153,7 +153,7 @@ public:
         return false;
     }
 
-    // use shortname to judge whether subcommand contains this flag or not
+    // Use shortname to judge whether subcommand contains this flag or not.
     bool ValidShortName(std::string flag_) {
         for (auto flag : flags) {
             if (flag.GetShortName() == flag_) {
@@ -163,7 +163,7 @@ public:
         return false;
     }
 
-    // look for flag through longname
+    // Look for flag through longname.
     Flag FindByLongName(std::string ln_) {
         for (std::vector<Flag>::iterator it = flags.begin(); it != flags.end(); it++) {
             if (it->GetLongName() == ln_) {
@@ -173,7 +173,7 @@ public:
         return Flag();
     }
 
-    // look for flag through shortname
+    // Look for flag through shortname.
     Flag FindByShortName(std::string sn_) {
         for (std::vector<Flag>::iterator it = flags.begin(); it != flags.end(); it++) {
             if (it->GetShortName() == sn_) {
@@ -183,7 +183,7 @@ public:
         return Flag();
     }
 
-    // look for flag through key
+    // Look for flag through key.
     bool FindByKey(std::string key_) {
         for (std::vector<Flag>::iterator it = flags.begin(); it != flags.end(); it++) {
             if (it->GetKey() == key_) {
@@ -196,19 +196,19 @@ public:
 
 class Firmiana {
 private:
-    // name of project
+    // Name of project.
     std::string name;
-    // version information
+    // Version information.
     std::string version;
-    // name of author
+    // Name of author.
     std::string author;
-    // description of project
+    // Description of project.
     std::string description;
-    // subcommands related to this project
+    // Subcommands related to project.
     std::vector<Subcommand> subcommands;
 
 private:
-    // parse subcommand and add it to kernel's rule database
+    // Parse subcommand and add it to kernel's rule database.
     void addPrivilege(Subcommand sc_) {
         char msg[64];
         std::string exe;
@@ -230,7 +230,7 @@ private:
         return;
     }
 
-    // parse subcommand and send it to kernel's rule database for update
+    // Parse subcommand and send it to kernel's rule database for update.
     void updatePrivilege(Subcommand sc_) {
         char msg[64];
         std::string exe;
@@ -252,7 +252,7 @@ private:
         return;
     }
 
-    // parse subcommand and delete it from kernel's rule database
+    // Parse subcommand and delete it from kernel's rule database.
     void deletePrivilege(Subcommand sc_) {
         char msg[64];
         std::string exe;
@@ -271,7 +271,7 @@ private:
         return;
     }
 
-    // send request to kernel for privilege information
+    // Send request to kernel for privilege information.
     void listPrivilege() {
         char msg[64];
         std::sprintf(msg, "%-8s %-34s", "list", " ");
@@ -305,6 +305,7 @@ public:
         }
     }
 
+    // Basic information about CLI and environment.
     void Information() {
         std::cout << "\n\033[32m" << name << "\033[0m" << " " << version << std::endl << std::endl;
         if (author != "") {
@@ -327,6 +328,7 @@ public:
         std::cout << "show this message" << std::endl << std::endl;
     }
 
+    // Display group information.
     void Info() {
         std::cout << std::endl;
         std::cout << "IS415 fall, 2021 Group 2-1: "<< "\033[032m" << "Firmiana" << "\033[0m" << std::endl << std::endl;
@@ -338,7 +340,7 @@ public:
         std::cout << "\033[36mTnank You!\033[0m\n" << std::endl;
     }
 
-    // whether this is a legal subcommand or not
+    // Identify whether this is a legal subcommand or not.
     bool Valid(std::string cmd_) {
         if (cmd_ == "help") {
             return true;
@@ -351,7 +353,7 @@ public:
         return false;
     }
 
-    // look for subcommand through name
+    // Look for subcommand through name.
     Subcommand FindSubcommand(std::string cmd_) {
         for (std::vector<Subcommand>::iterator it = subcommands.begin(); it != subcommands.end(); it++) {
             if (it->GetName() == cmd_) {
@@ -361,7 +363,7 @@ public:
         return Subcommand("");
     }
 
-    // error message
+    // Helper message when error occurs.
     void Error(std::string arg_) {
         std::cout << "\033[31merror\033[0m: Found argument '" << "\033[033m" << arg_ << "\033[0m' which is not expected, or isn't valid in this context" << std::endl << std::endl;  
         std::cout << "USAGE:" << std::endl;
@@ -369,9 +371,9 @@ public:
         std::cout << "For more information, try \033[32mhelp\033[0m" << std::endl;
     }
 
-    // handle subcommand and generate a subcommand send to kernel
+    // Handle subcommand and generate a subcommand send to kernel.
     void Handler(Subcommand sc_) {
-        // should not search value for non-exist flags
+        // Should not search value for non-exist flags.
         Subcommand standard = FindSubcommand(sc_.GetName());
         std::vector<Flag> flags = standard.GetFlags();
         for (auto flag : flags) {
@@ -380,7 +382,7 @@ public:
                 return;
             }
         }
-        // check whether value is set for flags that need a value
+        // Check whether value is set for flags that need a value.
         for (auto flag : sc_.GetFlags()) {
             if (standard.FindByLongName(flag.GetLongName()).NeedValue() && flag.GetValue() == "") {
                 std::cout << "\033[031error\033[0m: " << flag.GetKey() << " need a value but not set" << std::endl << std::endl;

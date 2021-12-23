@@ -1,5 +1,5 @@
 /*
- * creat is used for test creat privilege
+ * `creat.c` is used for test creat privilege.
  */
 
 #include <stdio.h>

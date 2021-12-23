@@ -1,4 +1,7 @@
+# `firmiana.sh` is used for test functions and presentation.
+
 #!/bin/bash
+
 echo -e "\033[32mIS415 Group 2-1:\033[0m \033[36mFirmiana\033[0m"
 if [ $# -eq 2 ]
 then 
