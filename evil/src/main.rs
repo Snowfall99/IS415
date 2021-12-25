@@ -10,7 +10,7 @@ fn main() {
     let cmd = App::new("Evil")
         .version("0.0.1")
         .author("Snowfall99")
-        .about("IS415 Group 8: Evil test")
+        .about("IS415 Group 2-1: Evil test")
         .subcommand(App::new("WRITE")
             .about("test WRITE privilege")
             .version("0.0.1")
