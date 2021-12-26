@@ -56,30 +56,30 @@ function mkdir_test() {
   echo -e "\n\033[32mTest mkdir privilege\033[0m"
   cd ./evil
   pwd
-  ls --color -la
+  ls --color
   echo -e "\033[33mForbid\033[0m evil make directory"
   sudo firmiana ADD -e evil --mkdir 0
   ./evil MKDIR
-  ls --color -la
+  ls --color
   echo -e "\033[33mAllow\033[0m evil make directory"
   sudo firmiana UPDATE -e evil --mkdir 1
   ./evil MKDIR
-  ls --color -la
+  ls --color
   echo -e "\033[32mMkdir test finished\033[0m\n"
 }
 
 function rmdir_test() {
   echo -e "\n\033[32mTest rmdir privilege\033[0m"
   cd ./evil 
-  ls --color -la
+  ls --color
   echo -e "\033[33mForbid\033[0m evil remove directory"
   sudo firmiana ADD -e evil -t new --rmdir 0
   ./evil RMDIR 
-  ls --color -la
+  ls --color
   echo -e "\033[33mAllow\033[0m evil remove directory"
   sudo firmiana UPDATE -e evil -t new --rmdir 1
   ./evil RMDIR
-  ls --color -la 
+  ls --color
   echo -e "\033[32mRmdir test finished\033[0m\n"
 }
 
